@@ -35,11 +35,17 @@
             Download PDF
         </a>
     @elseif($materi->tipe == 'video')
-        <div class="mb-4">
-            <video controls class="w-full rounded-lg">
-                <source src="{{ Storage::url($materi->file_path) }}" type="video/mp4">
-                Browser Anda tidak mendukung video tag.
-            </video>
+        <div class="mb-6 flex justify-center">
+            <div class="w-full max-w-3xl rounded-xl shadow-xl overflow-hidden bg-black">
+                <video
+                    controls
+                    class="w-full h-full"
+                    style="aspect-ratio: 16 / 9;"
+                >
+                    <source src="{{ Storage::url($materi->file_path) }}" type="video/mp4">
+                    Browser Anda tidak mendukung video tag.
+                </video>
+            </div>
         </div>
         <a href="{{ Storage::url($materi->file_path) }}" target="_blank" 
            class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
