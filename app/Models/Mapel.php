@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Mapel extends Model
@@ -29,5 +30,11 @@ class Mapel extends Model
     public function quiz(): HasMany
     {
         return $this->hasMany(Quiz::class);
+    }
+
+    public function pengajar(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'kelas_pengajar', 'mapel_id', 'pengajar_id')
+            ->withPivot('kelas_id');
     }
 }

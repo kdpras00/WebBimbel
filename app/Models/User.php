@@ -70,6 +70,12 @@ class User extends Authenticatable
             ->withPivot('mapel_id');
     }
 
+    public function mapelDiajar()
+    {
+        return $this->belongsToMany(Mapel::class, 'kelas_pengajar', 'pengajar_id', 'mapel_id')
+            ->withPivot('kelas_id');
+    }
+
     public function materi()
     {
         return $this->hasMany(Materi::class, 'pengajar_id');

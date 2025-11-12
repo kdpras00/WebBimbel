@@ -5,10 +5,8 @@ namespace App\Http\Controllers\Pengajar;
 use App\Http\Controllers\Controller;
 use App\Models\Quiz;
 use App\Models\Question;
-use App\Models\Mapel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class QuizController extends Controller
 {
@@ -27,13 +25,8 @@ class QuizController extends Controller
     public function create()
     {
         $user = Auth::user();
-        // Get mapel yang diajar oleh pengajar ini melalui tabel pivot kelas_pengajar
-        $mapelIds = DB::table('kelas_pengajar')
-            ->where('pengajar_id', $user->id)
-            ->pluck('mapel_id')
-            ->unique();
-        
-        $mapel = Mapel::whereIn('id', $mapelIds)
+        // Ambil mapel yang diajar pengajar melalui relasi pivot
+        $mapel = $user->mapelDiajar()
             ->with('kelas')
             ->get();
 
