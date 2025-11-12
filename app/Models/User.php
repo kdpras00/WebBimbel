@@ -85,6 +85,11 @@ class User extends Authenticatable
         return $this->hasMany(QuizResult::class, 'siswa_id');
     }
 
+    public function quizSessions()
+    {
+        return $this->hasMany(QuizSession::class, 'siswa_id');
+    }
+
     public function point()
     {
         return $this->hasOne(Point::class);

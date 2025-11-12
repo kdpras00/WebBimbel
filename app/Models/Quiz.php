@@ -42,4 +42,9 @@ class Quiz extends Model
     {
         return $this->hasMany(QuizResult::class);
     }
+
+    public function sessions(): HasMany
+    {
+        return $this->hasMany(QuizSession::class);
+    }
 }

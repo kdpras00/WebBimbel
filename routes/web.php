@@ -16,6 +16,7 @@ use App\Http\Controllers\Siswa\DashboardController as SiswaDashboardController;
 use App\Http\Controllers\Siswa\MateriController as SiswaMateriController;
 use App\Http\Controllers\Siswa\QuizController as SiswaQuizController;
 use App\Http\Controllers\Siswa\LeaderboardController as SiswaLeaderboardController;
+use App\Http\Controllers\Siswa\QuizSessionController as SiswaQuizSessionController;
 use App\Http\Controllers\Wali\DashboardController as WaliDashboardController;
 
 // Home
@@ -78,6 +79,9 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->name('siswa.')->grou
     Route::get('/quiz/{id}', [SiswaQuizController::class, 'show'])->name('quiz.show');
     Route::post('/quiz/{id}/submit', [SiswaQuizController::class, 'submit'])->name('quiz.submit');
     Route::get('/quiz/result/{id}', [SiswaQuizController::class, 'result'])->name('quiz.result');
+    Route::post('/quiz/{quiz}/session/pause', [SiswaQuizSessionController::class, 'pause'])->name('quiz.session.pause');
+    Route::post('/quiz/{quiz}/session/resume', [SiswaQuizSessionController::class, 'resume'])->name('quiz.session.resume');
+    Route::post('/quiz/{quiz}/session/warning', [SiswaQuizSessionController::class, 'warning'])->name('quiz.session.warning');
     Route::get('/leaderboard', [SiswaLeaderboardController::class, 'index'])->name('leaderboard.index');
     Route::get('/progress', [SiswaDashboardController::class, 'progress'])->name('progress');
 });
