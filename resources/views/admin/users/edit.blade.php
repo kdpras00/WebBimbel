@@ -4,35 +4,35 @@
 
 @section('content')
 <div class="mb-6">
-    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Edit User</h1>
+    <h1 class="text-3xl font-bold text-black">Edit User</h1>
 </div>
 
-<div class="bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 p-6">
+<div class="rounded-lg shadow border border-gray-200 p-6" style="background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);">
     <form action="{{ route('admin.users.update', $user->id) }}" method="POST">
         @csrf
         @method('PUT')
         <div class="mb-4">
-            <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nama</label>
+            <label class="block mb-2 text-sm font-medium text-black text-black">Nama</label>
             <input type="text" name="name" value="{{ old('name', $user->name) }}" required
-                   class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
+                   class="bg-white border border-gray-300 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 text-black">
         </div>
 
         <div class="mb-4">
-            <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Email</label>
+            <label class="block mb-2 text-sm font-medium text-black text-black">Email</label>
             <input type="email" name="email" value="{{ old('email', $user->email) }}" required
-                   class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
+                   class="bg-white border border-gray-300 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 text-black">
         </div>
 
         <div class="mb-4">
-            <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Password (kosongkan jika tidak diubah)</label>
+            <label class="block mb-2 text-sm font-medium text-black text-black">Password (kosongkan jika tidak diubah)</label>
             <input type="password" name="password"
-                   class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
+                   class="bg-white border border-gray-300 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 text-black">
         </div>
 
         <div class="mb-4">
-            <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Role</label>
+            <label class="block mb-2 text-sm font-medium text-black text-black">Role</label>
             <select name="role" required
-                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    class="bg-white border border-gray-300 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 text-black">
                 <option value="admin" {{ $user->role == 'admin' ? 'selected' : '' }}>Admin</option>
                 <option value="pengajar" {{ $user->role == 'pengajar' ? 'selected' : '' }}>Pengajar</option>
                 <option value="siswa" {{ $user->role == 'siswa' ? 'selected' : '' }}>Siswa</option>
@@ -41,9 +41,9 @@
         </div>
 
         <div class="mb-4">
-            <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Wali (jika siswa)</label>
+            <label class="block mb-2 text-sm font-medium text-black text-black">Wali (jika siswa)</label>
             <select name="wali_id"
-                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    class="bg-white border border-gray-300 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 text-black">
                 <option value="">Pilih Wali</option>
                 @foreach($walis as $wali)
                     <option value="{{ $wali->id }}" {{ $user->wali_id == $wali->id ? 'selected' : '' }}>{{ $wali->name }}</option>

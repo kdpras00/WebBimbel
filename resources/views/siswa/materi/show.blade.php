@@ -7,23 +7,23 @@
     <a href="{{ route('siswa.materi.index') }}" class="text-blue-600 hover:underline mb-4 inline-block">
         ← Kembali ke Daftar Materi
     </a>
-    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ $materi->judul }}</h1>
-    <div class="mt-2 flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+    <h1 class="text-3xl font-bold text-white">{{ $materi->judul }}</h1>
+    <div class="mt-2 flex items-center gap-4 text-sm text-gray-100">
         <span>{{ $materi->mapel->kelas->nama }} - {{ $materi->mapel->nama }}</span>
         <span>•</span>
         <span>{{ $materi->pengajar->name }}</span>
     </div>
 </div>
 
-<div class="bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 p-6">
+<div class="rounded-lg shadow border border-gray-200 p-6" style="background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);">
     @if($materi->deskripsi)
         <div class="mb-6">
-            <p class="text-gray-700 dark:text-gray-300">{{ $materi->deskripsi }}</p>
+            <p class="text-gray-700">{{ $materi->deskripsi }}</p>
         </div>
     @endif
 
     @if($materi->tipe == 'teks')
-        <div class="prose dark:prose-invert max-w-none">
+        <div class="prose max-w-none">
             {!! nl2br(e($materi->konten)) !!}
         </div>
     @elseif($materi->tipe == 'pdf')

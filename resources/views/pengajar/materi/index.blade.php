@@ -4,16 +4,16 @@
 
 @section('content')
 <div class="mb-6 flex justify-between items-center">
-    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Kelola Materi</h1>
+    <h1 class="text-3xl font-bold text-white">Kelola Materi</h1>
     <a href="{{ route('pengajar.materi.create') }}" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
         Tambah Materi
     </a>
 </div>
 
-<div class="bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+<div class="rounded-lg shadow border border-gray-200" style="background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);">
     <div class="overflow-x-auto">
-        <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+        <table class="w-full text-sm text-left text-black">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-100">
                 <tr>
                     <th scope="col" class="px-6 py-3">Judul</th>
                     <th scope="col" class="px-6 py-3">Mata Pelajaran</th>
@@ -24,11 +24,11 @@
             </thead>
             <tbody>
                 @forelse($materi as $m)
-                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                        <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ $m->judul }}</td>
-                        <td class="px-6 py-4">{{ $m->mapel->nama }} ({{ $m->mapel->kelas->nama }})</td>
+                    <tr class="bg-white border-b border-gray-200">
+                        <td class="px-6 py-4 font-medium text-black">{{ $m->judul }}</td>
+                        <td class="px-6 py-4 text-black">{{ $m->mapel->nama }} ({{ $m->mapel->kelas->nama }})</td>
                         <td class="px-6 py-4">
-                            <span class="px-2 py-1 text-xs font-medium rounded bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
+                            <span class="px-2 py-1 text-xs font-medium rounded bg-blue-100 text-blue-800">
                                 {{ strtoupper($m->tipe) }}
                             </span>
                         </td>

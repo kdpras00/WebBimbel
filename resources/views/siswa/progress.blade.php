@@ -4,8 +4,8 @@
 
 @section('content')
 <div class="mb-6">
-    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Progress Belajar</h1>
-    <p class="mt-2 text-gray-600 dark:text-gray-400">Lihat perkembangan nilai dan hasil belajar Anda</p>
+    <h1 class="text-3xl font-bold text-white">Progress Belajar</h1>
+    <p class="mt-2 text-gray-100">Lihat perkembangan nilai dan hasil belajar Anda</p>
 </div>
 
 @if($results->count() > 0)
@@ -16,31 +16,29 @@
             $totalQuiz = $results->count();
             $bestScore = $results->max('nilai');
         @endphp
-        
-        <div class="bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 p-6">
-            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Rata-rata Nilai</p>
-            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($averageScore, 1) }}</p>
+
+        <div class="rounded-lg shadow border border-gray-200 p-6 flex flex-col items-center bg-white">
+            <p class="text-sm font-medium text-gray-600 mb-1">Rata-rata Nilai</p>
+            <p class="text-2xl font-bold text-black">{{ number_format($averageScore, 1) }}</p>
         </div>
-        
-        <div class="bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 p-6">
-            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Quiz</p>
-            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $totalQuiz }}</p>
+        <div class="rounded-lg shadow border border-gray-200 p-6 flex flex-col items-center bg-white">
+            <p class="text-sm font-medium text-gray-600 mb-1">Total Quiz</p>
+            <p class="text-2xl font-bold text-black">{{ $totalQuiz }}</p>
         </div>
-        
-        <div class="bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 p-6">
-            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Nilai Tertinggi</p>
-            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $bestScore }}</p>
+        <div class="rounded-lg shadow border border-gray-200 p-6 flex flex-col items-center bg-white">
+            <p class="text-sm font-medium text-gray-600 mb-1">Nilai Tertinggi</p>
+            <p class="text-2xl font-bold text-black">{{ $bestScore }}</p>
         </div>
     </div>
 
     <!-- Results Table -->
-    <div class="bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
-        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
-            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Riwayat Quiz</h2>
+    <div class="rounded-lg shadow border border-gray-200 bg-white">
+        <div class="p-6 border-b border-gray-200 bg-white">
+            <h2 class="text-xl font-semibold text-black">Riwayat Quiz</h2>
         </div>
         <div class="overflow-x-auto">
-            <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+            <table class="min-w-full text-sm text-left text-black">
+                <thead class="text-xs text-gray-700 uppercase bg-gray-100">
                     <tr>
                         <th scope="col" class="px-6 py-3">Quiz</th>
                         <th scope="col" class="px-6 py-3">Mata Pelajaran</th>
@@ -51,22 +49,22 @@
                 </thead>
                 <tbody>
                     @foreach($results as $result)
-                        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                            <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">
+                        <tr class="bg-white border-b last:border-0">
+                            <td class="px-6 py-4 font-medium text-black align-middle">
                                 {{ $result->quiz->judul }}
                             </td>
-                            <td class="px-6 py-4">{{ $result->quiz->mapel->nama }}</td>
-                            <td class="px-6 py-4">
+                            <td class="px-6 py-4 text-black align-middle">{{ $result->quiz->mapel->nama }}</td>
+                            <td class="px-6 py-4 align-middle">
                                 <span class="px-2 py-1 text-xs font-medium rounded 
-                                    @if($result->nilai >= 80) bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300
-                                    @elseif($result->nilai >= 60) bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300
-                                    @else bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300
+                                    @if($result->nilai >= 80) bg-green-100 text-green-800
+                                    @elseif($result->nilai >= 60) bg-yellow-100 text-yellow-800
+                                    @else bg-red-100 text-red-800
                                     @endif">
                                     {{ $result->nilai }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4">{{ $result->jawaban_benar }}/{{ $result->total_soal }}</td>
-                            <td class="px-6 py-4">{{ $result->created_at->format('d M Y H:i') }}</td>
+                            <td class="px-6 py-4 text-black align-middle">{{ $result->jawaban_benar }}/{{ $result->total_soal }}</td>
+                            <td class="px-6 py-4 text-black align-middle whitespace-nowrap">{{ $result->created_at->format('d M Y H:i') }}</td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -74,8 +72,8 @@
         </div>
     </div>
 @else
-    <div class="bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 p-12 text-center">
-        <p class="text-gray-500 dark:text-gray-400">Belum ada hasil quiz. Mulai kerjakan quiz untuk melihat progress Anda!</p>
+    <div class="rounded-lg shadow border border-gray-200 p-12 text-center bg-white">
+        <p class="text-gray-500">Belum ada hasil quiz. Mulai kerjakan quiz untuk melihat progress Anda!</p>
         <a href="{{ route('siswa.quiz.index') }}" 
            class="mt-4 inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
             Lihat Quiz

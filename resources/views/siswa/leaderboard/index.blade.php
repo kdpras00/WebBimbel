@@ -4,8 +4,8 @@
 
 @section('content')
 <div class="mb-6">
-    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Leaderboard</h1>
-    <p class="mt-2 text-gray-600 dark:text-gray-400">Peringkat siswa berdasarkan total poin</p>
+    <h1 class="text-3xl font-bold text-white">Leaderboard</h1>
+    <p class="mt-2 text-gray-100">Peringkat siswa berdasarkan total poin</p>
 </div>
 
 @if($userRank)
@@ -28,10 +28,10 @@
     </div>
 @endif
 
-<div class="bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+<div class="rounded-lg shadow border border-gray-200" style="background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);">
     <div class="overflow-x-auto">
-        <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+        <table class="w-full text-sm text-left text-black">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-100">
                 <tr>
                     <th scope="col" class="px-6 py-3">Peringkat</th>
                     <th scope="col" class="px-6 py-3">Nama</th>
@@ -40,8 +40,8 @@
             </thead>
             <tbody>
                 @forelse($leaderboard as $index => $point)
-                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 
-                        @if($point->user_id == Auth::id()) bg-blue-50 dark:bg-blue-900/20 @endif">
+                    <tr class="bg-white border-b border-gray-200 
+                        @if($point->user_id == Auth::id()) bg-blue-50 @endif">
                         <td class="px-6 py-4">
                             @if($index < 3)
                                 <span class="text-2xl">
@@ -51,16 +51,16 @@
                                     @endif
                                 </span>
                             @else
-                                <span class="font-bold text-gray-900 dark:text-white">#{{ $index + 1 }}</span>
+                                <span class="font-bold text-black">#{{ $index + 1 }}</span>
                             @endif
                         </td>
-                        <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">
+                        <td class="px-6 py-4 font-medium text-black">
                             {{ $point->user->name }}
                             @if($point->user_id == Auth::id())
-                                <span class="ml-2 text-xs text-blue-600 dark:text-blue-400">(Anda)</span>
+                                <span class="ml-2 text-xs text-blue-600">(Anda)</span>
                             @endif
                         </td>
-                        <td class="px-6 py-4 font-bold text-gray-900 dark:text-white">
+                        <td class="px-6 py-4 font-bold text-black">
                             {{ $point->total_poin }} poin
                         </td>
                     </tr>
