@@ -36,21 +36,26 @@
         </a>
     @elseif($materi->tipe == 'video')
         <div class="mb-6 flex justify-center">
-            <div class="w-full max-w-3xl rounded-xl shadow-xl overflow-hidden bg-black">
+            <div class="w-full rounded-xl shadow-xl overflow-hidden bg-black" style="max-width: 100%;">
                 <video
                     controls
                     class="w-full h-full"
-                    style="aspect-ratio: 16 / 9;"
+                    style="aspect-ratio: 16 / 9; min-height: 500px; width: 100%;"
                 >
                     <source src="{{ Storage::url($materi->file_path) }}" type="video/mp4">
                     Browser Anda tidak mendukung video tag.
                 </video>
             </div>
         </div>
-        <a href="{{ Storage::url($materi->file_path) }}" target="_blank" 
-           class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
-            Download Video
-        </a>
+        <div class="flex justify-start">
+            <a href="{{ Storage::url($materi->file_path) }}" download
+               class="inline-flex items-center gap-2 px-6 py-3 text-base font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                </svg>
+                Download Video
+            </a>
+        </div>
     @endif
 </div>
 @endsection

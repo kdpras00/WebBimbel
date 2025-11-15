@@ -294,7 +294,7 @@ document.addEventListener('DOMContentLoaded', function() {
         warning: @json(route('siswa.quiz.session.warning', $quiz->id)),
     };
     const hasTimer = {{ $quiz->durasi ? 'true' : 'false' }};
-    let timeRemaining = {{ $remainingSeconds !== null ? $remainingSeconds : 'null' }};
+    let initialTimeRemaining = {{ $remainingSeconds !== null ? $remainingSeconds : 'null' }};
     let timerInterval = null;
     let quizStarted = false;
     let quizPaused = false;
@@ -304,6 +304,9 @@ document.addEventListener('DOMContentLoaded', function() {
     let warningCount = {{ $session->warning_count }};
     const maxWarnings = {{ $maxWarnings }};
     const quizSessionId = {{ $session->id }};
+    // Timestamp-based timer untuk tetap berjalan saat tab tidak aktif
+    let timerStartTime = null; // Timestamp saat timer mulai (dalam detik)
+    let timerInitialSeconds = null; // Waktu tersisa saat timer mulai (dalam detik)
 
     if (!quizForm) {
         return;
@@ -401,8 +404,27 @@ document.addEventListener('DOMContentLoaded', function() {
         timerElement.classList.add(...stateStyles[state].text);
     }
 
+    function calculateTimeRemaining() {
+        if (!hasTimer || timerInitialSeconds === null || timerStartTime === null) {
+            return initialTimeRemaining;
+        }
+
+        // Timer tetap berjalan meskipun tab tidak aktif (tidak bergantung pada quizPaused)
+        const now = Math.floor(Date.now() / 1000);
+        const elapsed = now - timerStartTime;
+        const remaining = Math.max(0, timerInitialSeconds - elapsed);
+        
+        return remaining;
+    }
+
     function updateTimerDisplay() {
-        if (!hasTimer || timeRemaining === null || !timerElement) {
+        if (!hasTimer || !timerElement) {
+            return;
+        }
+
+        const timeRemaining = calculateTimeRemaining();
+        
+        if (timeRemaining === null) {
             return;
         }
 
@@ -420,17 +442,26 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function startTimerInterval() {
-        if (!hasTimer || timeRemaining === null) {
+        if (!hasTimer || initialTimeRemaining === null) {
             return;
+        }
+
+        // Inisialisasi timer berbasis timestamp
+        if (timerStartTime === null) {
+            timerStartTime = Math.floor(Date.now() / 1000);
+            timerInitialSeconds = initialTimeRemaining;
         }
 
         clearInterval(timerInterval);
         updateTimerDisplay();
 
+        // Timer interval hanya untuk update display, perhitungan waktu berdasarkan timestamp
         timerInterval = setInterval(function() {
-            if (!quizStarted || quizPaused || quizSubmitting) {
+            if (!quizStarted || quizSubmitting) {
                 return;
             }
+
+            const timeRemaining = calculateTimeRemaining();
 
             if (timeRemaining <= 0) {
                 clearInterval(timerInterval);
@@ -438,27 +469,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
-            timeRemaining = Math.max(0, timeRemaining - 1);
             updateTimerDisplay();
-
-            if (timeRemaining === 0) {
-                clearInterval(timerInterval);
-                submitQuiz();
-            }
-        }, 1000);
+        }, 100); // Update lebih sering untuk akurasi yang lebih baik
     }
 
     function pauseQuiz() {
+        // Timer tidak lagi dipause saat alt-tab, hanya untuk keperluan server tracking
         if (!quizStarted || quizPaused || quizSubmitting) {
             return;
         }
 
         quizPaused = true;
-        clearInterval(timerInterval);
 
         callLaravel(endpoints.pause).then(({ ok, data }) => {
             if (ok && typeof data.remaining_seconds === 'number') {
-                timeRemaining = data.remaining_seconds;
+                // Update timer dengan waktu dari server
+                timerStartTime = Math.floor(Date.now() / 1000);
+                timerInitialSeconds = data.remaining_seconds;
+                initialTimeRemaining = data.remaining_seconds;
                 updateTimerDisplay();
             }
 
@@ -482,7 +510,10 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             if (data && typeof data.remaining_seconds === 'number') {
-                timeRemaining = data.remaining_seconds;
+                // Update timer dengan waktu dari server
+                timerStartTime = Math.floor(Date.now() / 1000);
+                timerInitialSeconds = data.remaining_seconds;
+                initialTimeRemaining = data.remaining_seconds;
             }
 
             quizPaused = false;
@@ -544,6 +575,12 @@ document.addEventListener('DOMContentLoaded', function() {
         quizStarted = true;
         quizPaused = false;
 
+        // Inisialisasi timer berbasis timestamp
+        if (hasTimer && initialTimeRemaining !== null) {
+            timerStartTime = Math.floor(Date.now() / 1000);
+            timerInitialSeconds = initialTimeRemaining;
+        }
+
         updateWarningUI();
         updateTimerDisplay();
         startTimerInterval();
@@ -603,12 +640,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         blurStartTime = Date.now();
-        pauseQuiz();
+        // Timer tetap berjalan, hanya log warning
+        logWarning();
 
         clearTimeout(blurTimeout);
         blurTimeout = setTimeout(function() {
             const diff = Date.now() - (blurStartTime || Date.now());
-            if (diff >= 10000 && quizPaused) {
+            if (diff >= 10000) {
+                // Jika tab tidak aktif lebih dari 10 detik, submit otomatis
                 submitQuiz();
             }
         }, 10000);
@@ -621,9 +660,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
         clearTimeout(blurTimeout);
         blurStartTime = null;
-
-        if (quizPaused) {
-            resumeQuiz();
+        
+        // Sync waktu dengan server saat kembali ke tab
+        if (hasTimer && initialTimeRemaining !== null) {
+            callLaravel(endpoints.resume).then(({ ok, data }) => {
+                if (ok && data && typeof data.remaining_seconds === 'number') {
+                    timerStartTime = Math.floor(Date.now() / 1000);
+                    timerInitialSeconds = data.remaining_seconds;
+                    initialTimeRemaining = data.remaining_seconds;
+                    updateTimerDisplay();
+                }
+            });
         }
     });
 
@@ -633,14 +680,25 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         if (document.hidden) {
-            pauseQuiz();
+            // Timer tetap berjalan, hanya log warning
             logWarning();
         } else {
-            resumeQuiz();
+            // Sync waktu dengan server saat tab kembali aktif
+            if (hasTimer && initialTimeRemaining !== null) {
+                callLaravel(endpoints.resume).then(({ ok, data }) => {
+                    if (ok && data && typeof data.remaining_seconds === 'number') {
+                        timerStartTime = Math.floor(Date.now() / 1000);
+                        timerInitialSeconds = data.remaining_seconds;
+                        initialTimeRemaining = data.remaining_seconds;
+                        updateTimerDisplay();
+                    }
+                });
+            }
         }
     });
 
     window.addEventListener('beforeunload', function(e) {
+        const timeRemaining = calculateTimeRemaining();
         if (quizStarted && !quizSubmitting && (timeRemaining === null || timeRemaining > 0)) {
             e.preventDefault();
             e.returnValue = 'Apakah Anda yakin ingin meninggalkan halaman? Progress quiz Anda akan hilang.';

@@ -29,7 +29,9 @@ class MateriController extends Controller
             ->with('kelas')
             ->get();
 
-        return view('pengajar.materi.create', compact('mapel'));
+        $jurusanOptions = ['IPA', 'IPS'];
+
+        return view('pengajar.materi.create', compact('mapel', 'jurusanOptions'));
     }
 
     public function store(Request $request)
@@ -38,10 +40,47 @@ class MateriController extends Controller
             'judul' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
             'tipe' => 'required|in:pdf,video,teks',
-            'file_path' => 'nullable|file|mimes:pdf,mp4,avi,mov|max:10240',
+            'file_path' => 'nullable|file|max:10240',
             'konten' => 'nullable|string',
             'mapel_id' => 'required|exists:mapel,id',
+            'jurusan' => 'nullable|string|max:50',
         ]);
+
+        // Validasi file sesuai tipe
+        if ($validated['tipe'] == 'pdf') {
+            $request->validate([
+                'file_path' => 'required|file|mimes:pdf|max:10240',
+            ]);
+        } elseif ($validated['tipe'] == 'video') {
+            $request->validate([
+                'file_path' => 'required|file|mimes:mp4,avi,mov|max:10240',
+            ]);
+        } elseif ($validated['tipe'] == 'teks') {
+            // Untuk teks, file tidak diperlukan
+            if ($request->hasFile('file_path')) {
+                return redirect()->back()
+                    ->withInput()
+                    ->withErrors(['file_path' => 'Tipe teks tidak memerlukan file.']);
+            }
+        }
+
+        // Validasi jurusan berdasarkan kelas
+        $mapel = \App\Models\Mapel::with('kelas')->findOrFail($validated['mapel_id']);
+        $kelasNama = $mapel->kelas->nama ?? '';
+        preg_match('/\d+/', $kelasNama, $matches);
+        $kelasNumber = !empty($matches) ? (int)$matches[0] : 0;
+
+        // Jika kelas 1-9, jurusan harus kosong
+        if ($kelasNumber >= 1 && $kelasNumber <= 9) {
+            $validated['jurusan'] = null;
+        } elseif ($kelasNumber >= 10 && $kelasNumber <= 12) {
+            // Jika kelas 10-12, jurusan harus diisi (tidak boleh kosong)
+            if (empty($validated['jurusan'])) {
+                return redirect()->back()
+                    ->withInput()
+                    ->withErrors(['jurusan' => 'Jurusan harus dipilih untuk kelas 10-12.']);
+            }
+        }
 
         $validated['pengajar_id'] = Auth::id();
 
@@ -64,7 +103,9 @@ class MateriController extends Controller
             ->with('kelas')
             ->get();
 
-        return view('pengajar.materi.edit', compact('materi', 'mapel'));
+        $jurusanOptions = ['IPA', 'IPS'];
+
+        return view('pengajar.materi.edit', compact('materi', 'mapel', 'jurusanOptions'));
     }
 
     public function update(Request $request, $id)
@@ -75,10 +116,67 @@ class MateriController extends Controller
             'judul' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
             'tipe' => 'required|in:pdf,video,teks',
-            'file_path' => 'nullable|file|mimes:pdf,mp4,avi,mov|max:10240',
+            'file_path' => 'nullable|file|max:10240',
             'konten' => 'nullable|string',
             'mapel_id' => 'required|exists:mapel,id',
+            'jurusan' => 'nullable|string|max:50',
         ]);
+
+        // Validasi file sesuai tipe (hanya jika file diupload)
+        if ($request->hasFile('file_path')) {
+            if ($validated['tipe'] == 'pdf') {
+                $request->validate([
+                    'file_path' => 'required|file|mimes:pdf|max:10240',
+                ]);
+            } elseif ($validated['tipe'] == 'video') {
+                $request->validate([
+                    'file_path' => 'required|file|mimes:mp4,avi,mov|max:10240',
+                ]);
+            } elseif ($validated['tipe'] == 'teks') {
+                return redirect()->back()
+                    ->withInput()
+                    ->withErrors(['file_path' => 'Tipe teks tidak memerlukan file.']);
+            }
+        } else {
+            // Jika tidak ada file baru diupload, pastikan tipe sesuai dengan file yang sudah ada
+            if ($validated['tipe'] == 'pdf' && $materi->file_path && !str_ends_with($materi->file_path, '.pdf')) {
+                return redirect()->back()
+                    ->withInput()
+                    ->withErrors(['tipe' => 'File yang ada bukan PDF. Silakan upload file PDF baru atau ubah tipe.']);
+            } elseif ($validated['tipe'] == 'video' && $materi->file_path) {
+                $videoExtensions = ['.mp4', '.avi', '.mov'];
+                $isVideo = false;
+                foreach ($videoExtensions as $ext) {
+                    if (str_ends_with(strtolower($materi->file_path), $ext)) {
+                        $isVideo = true;
+                        break;
+                    }
+                }
+                if (!$isVideo) {
+                    return redirect()->back()
+                        ->withInput()
+                        ->withErrors(['tipe' => 'File yang ada bukan video. Silakan upload file video baru atau ubah tipe.']);
+                }
+            }
+        }
+
+        // Validasi jurusan berdasarkan kelas
+        $mapel = \App\Models\Mapel::with('kelas')->findOrFail($validated['mapel_id']);
+        $kelasNama = $mapel->kelas->nama ?? '';
+        preg_match('/\d+/', $kelasNama, $matches);
+        $kelasNumber = !empty($matches) ? (int)$matches[0] : 0;
+
+        // Jika kelas 1-9, jurusan harus kosong
+        if ($kelasNumber >= 1 && $kelasNumber <= 9) {
+            $validated['jurusan'] = null;
+        } elseif ($kelasNumber >= 10 && $kelasNumber <= 12) {
+            // Jika kelas 10-12, jurusan harus diisi (tidak boleh kosong)
+            if (empty($validated['jurusan'])) {
+                return redirect()->back()
+                    ->withInput()
+                    ->withErrors(['jurusan' => 'Jurusan harus dipilih untuk kelas 10-12.']);
+            }
+        }
 
         if ($request->hasFile('file_path')) {
             if ($materi->file_path) {

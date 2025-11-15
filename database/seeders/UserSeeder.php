@@ -70,11 +70,7 @@ class UserSeeder extends Seeder
             'wali_id' => $wali1->id,
         ]);
 
-        // Assign siswa to kelas
-        $kelas = Kelas::first();
-        if ($kelas) {
-            $kelas->siswa()->attach([$siswa1->id, $siswa2->id, $siswa3->id]);
-        }
+        // Note: Assign siswa to kelas dilakukan di KelasSiswaSeeder dengan jurusan
 
         // Create points for siswa
         Point::create(['user_id' => $siswa1->id, 'total_poin' => 50]);

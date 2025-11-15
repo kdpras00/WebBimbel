@@ -3,6 +3,9 @@
 @section('title', 'Hasil Quiz')
 
 @section('content')
+@php
+    $reverseOptionMapping = $reverseOptionMapping ?? [];
+@endphp
 <div class="mb-6">
     <h1 class="text-3xl font-bold text-white">Hasil Quiz</h1>
     <p class="mt-2 text-gray-100">{{ $result->quiz->judul }}</p>
@@ -64,8 +67,15 @@
             </div>
 
             @php
-                $userAnswer = $result->jawaban[$question->id] ?? null;
-                $isCorrect = $userAnswer == $question->jawaban_benar;
+                $userAnswerOriginal = $result->jawaban[$question->id] ?? null;
+                // Convert user answer from original key to shuffled key if mapping exists
+                $userAnswer = $userAnswerOriginal;
+                if (isset($reverseOptionMapping) && isset($reverseOptionMapping[$question->id]) && isset($reverseOptionMapping[$question->id][$userAnswerOriginal])) {
+                    $userAnswer = $reverseOptionMapping[$question->id][$userAnswerOriginal];
+                }
+                // Get original jawaban_benar for validation
+                $originalJawabanBenar = $question->original_jawaban_benar ?? $question->jawaban_benar;
+                $isCorrect = $userAnswerOriginal == $originalJawabanBenar;
             @endphp
 
             @if($question->tipe == 'pilihan_ganda')
@@ -89,7 +99,7 @@
             @else
                 <div class="p-3 bg-gray-50 rounded-lg">
                     <p class="text-sm text-gray-600 mb-2">Jawaban Anda:</p>
-                    <p class="text-black">{{ $userAnswer ?? 'Tidak dijawab' }}</p>
+                    <p class="text-black">{{ $userAnswerOriginal ?? 'Tidak dijawab' }}</p>
                 </div>
             @endif
         </div>

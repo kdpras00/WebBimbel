@@ -17,10 +17,14 @@ class QuizResult extends Model
         'waktu_pengerjaan',
         'attempt',
         'jawaban',
+        'question_order',
+        'option_mapping',
     ];
 
     protected $casts = [
         'jawaban' => 'array',
+        'question_order' => 'array',
+        'option_mapping' => 'array',
     ];
 
     public function quiz(): BelongsTo

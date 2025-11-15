@@ -18,6 +18,8 @@ class QuizSession extends Model
         'last_resumed_at',
         'paused_at',
         'submitted_at',
+        'question_order',
+        'option_mapping',
     ];
 
     protected $casts = [
@@ -25,6 +27,8 @@ class QuizSession extends Model
         'last_resumed_at' => 'datetime',
         'paused_at' => 'datetime',
         'submitted_at' => 'datetime',
+        'question_order' => 'array',
+        'option_mapping' => 'array',
     ];
 
     public function quiz(): BelongsTo

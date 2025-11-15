@@ -23,6 +23,7 @@ class User extends Authenticatable
         'password',
         'role',
         'wali_id',
+        'jurusan',
     ];
 
     /**
@@ -61,7 +62,8 @@ class User extends Authenticatable
 
     public function kelasSiswa()
     {
-        return $this->belongsToMany(Kelas::class, 'kelas_siswa', 'siswa_id', 'kelas_id');
+        return $this->belongsToMany(Kelas::class, 'kelas_siswa', 'siswa_id', 'kelas_id')
+            ->withPivot('jurusan');
     }
 
     public function kelasPengajar()

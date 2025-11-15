@@ -17,6 +17,7 @@ class Quiz extends Model
         'pengajar_id',
         'durasi',
         'is_published',
+        'jurusan',
     ];
 
     protected $casts = [

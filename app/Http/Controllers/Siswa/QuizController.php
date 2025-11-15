@@ -21,19 +21,76 @@ class QuizController extends Controller
         $this->gamificationService = $gamificationService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
-        $kelasIds = $user->kelasSiswa->pluck('id');
         
-        $quizzes = Quiz::where('is_published', true)
-            ->whereHas('mapel.kelas', function($query) use ($kelasIds) {
-                $query->whereIn('kelas.id', $kelasIds);
+        // Get kelas and jurusan from pivot table
+        $kelasSiswa = $user->kelasSiswa()->withPivot('jurusan')->get();
+        
+        $query = Quiz::where('is_published', true)
+            ->whereHas('mapel.kelas', function($q) use ($kelasSiswa) {
+                $kelasIds = $kelasSiswa->pluck('id');
+                $q->whereIn('kelas.id', $kelasIds);
             })
-            ->with('mapel')
-            ->get();
+            ->with('mapel');
 
-        return view('siswa.quiz.index', compact('quizzes'));
+        // Filter by kelas and jurusan
+        $query->where(function($q) use ($kelasSiswa) {
+            foreach ($kelasSiswa as $kelas) {
+                $kelasId = $kelas->id;
+                $jurusanSiswa = $kelas->pivot->jurusan;
+                
+                $q->orWhere(function($subQ) use ($kelasId, $jurusanSiswa) {
+                    $subQ->whereHas('mapel', function($mapelQ) use ($kelasId) {
+                        $mapelQ->where('kelas_id', $kelasId);
+                    });
+                    
+                    // If siswa has jurusan, filter by jurusan match or null
+                    // If siswa has no jurusan (kelas 1-6), only show quiz with null jurusan
+                    if ($jurusanSiswa) {
+                        $subQ->where(function($jurusanQ) use ($jurusanSiswa) {
+                            $jurusanQ->where('jurusan', $jurusanSiswa)
+                                     ->orWhereNull('jurusan');
+                        });
+                    } else {
+                        $subQ->whereNull('jurusan');
+                    }
+                });
+            }
+        });
+
+        // Search functionality
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('judul', 'like', "%{$search}%")
+                  ->orWhere('deskripsi', 'like', "%{$search}%")
+                  ->orWhereHas('mapel', function($q) use ($search) {
+                      $q->where('nama', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('mapel.kelas', function($q) use ($search) {
+                      $q->where('nama', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        $quizzes = $query->get();
+
+        // Get quiz results untuk user ini
+        $quizResults = QuizResult::where('siswa_id', $user->id)
+            ->whereIn('quiz_id', $quizzes->pluck('id'))
+            ->get()
+            ->groupBy('quiz_id')
+            ->map(function ($results) {
+                return [
+                    'count' => $results->count(),
+                    'max_attempt' => $results->max('attempt'),
+                    'latest_result' => $results->sortByDesc('created_at')->first(),
+                ];
+            });
+
+        return view('siswa.quiz.index', compact('quizzes', 'quizResults'));
     }
 
     public function show($id)
@@ -41,24 +98,55 @@ class QuizController extends Controller
         $quiz = Quiz::with('questions')->findOrFail($id);
         $user = Auth::user();
         
-        // Check if already completed
-        $existingResult = QuizResult::where('quiz_id', $id)
+        // Check attempt count
+        $attemptCount = QuizResult::where('quiz_id', $id)
             ->where('siswa_id', $user->id)
-            ->first();
+            ->count();
 
-        if ($existingResult) {
-            return redirect()->route('siswa.quiz.result', $existingResult->id);
+        // Maksimal 3 kali attempt
+        if ($attemptCount >= 3) {
+            $latestResult = QuizResult::where('quiz_id', $id)
+                ->where('siswa_id', $user->id)
+                ->latest()
+                ->first();
+            
+            return redirect()->route('siswa.quiz.result', $latestResult->id)
+                ->with('error', 'Anda sudah mencapai batas maksimal 3 kali attempt untuk quiz ini.');
         }
 
-        $session = QuizSession::firstOrCreate(
-            ['quiz_id' => $quiz->id, 'siswa_id' => $user->id],
-            [
+        // Check if there's an active session that's not submitted
+        $activeSession = QuizSession::where('quiz_id', $id)
+            ->where('siswa_id', $user->id)
+            ->where('status', '!=', 'submitted')
+            ->first();
+
+        if ($activeSession) {
+            // Continue existing session
+            $session = $activeSession;
+        } else {
+            // Check if there's a completed result but still can retry
+            $latestResult = QuizResult::where('quiz_id', $id)
+                ->where('siswa_id', $user->id)
+                ->latest()
+                ->first();
+
+            if ($latestResult && $attemptCount < 3) {
+                // User can retry, delete old session and create new one
+                QuizSession::where('quiz_id', $id)
+                    ->where('siswa_id', $user->id)
+                    ->delete();
+            }
+
+            // Create new session with full time
+            $session = QuizSession::create([
+                'quiz_id' => $quiz->id,
+                'siswa_id' => $user->id,
                 'status' => 'active',
                 'started_at' => now(),
                 'last_resumed_at' => now(),
                 'server_remaining_seconds' => $quiz->durasi ? $quiz->durasi * 60 : null,
-            ]
-        );
+            ]);
+        }
 
         if ($session->status !== 'submitted') {
             $session->update([
@@ -70,6 +158,101 @@ class QuizController extends Controller
         }
 
         $session->refresh();
+
+        // Randomize questions and options if not already randomized
+        if (empty($session->question_order) || empty($session->option_mapping)) {
+            $questions = $quiz->questions->shuffle();
+            $questionOrder = $questions->pluck('id')->toArray();
+            
+            $optionMapping = [];
+            $randomizedQuestions = collect();
+            
+            foreach ($questions as $question) {
+                if ($question->tipe == 'pilihan_ganda' && is_array($question->pilihan)) {
+                    // Acak urutan pilihan jawaban
+                    $pilihan = $question->pilihan;
+                    $originalKeys = array_keys($pilihan);
+                    
+                    // Buat array pasangan key-value untuk diacak
+                    $pairs = [];
+                    foreach ($originalKeys as $key) {
+                        $pairs[] = ['key' => $key, 'value' => $pilihan[$key]];
+                    }
+                    
+                    // Acak urutan pasangan
+                    shuffle($pairs);
+                    
+                    // Buat pilihan baru dengan urutan yang diacak
+                    // Keys tetap sama (A, B, C, D), tapi values diacak
+                    $shuffledPilihan = [];
+                    $reverseMapping = []; // shuffled_key => original_key
+                    
+                    foreach ($pairs as $i => $pair) {
+                        $shuffledKey = $originalKeys[$i]; // Gunakan key asli sesuai urutan
+                        $originalKey = $pair['key']; // Key asli yang memiliki value ini
+                        $shuffledPilihan[$shuffledKey] = $pair['value'];
+                        // Mapping: jika user memilih shuffledKey, itu berarti mereka memilih originalKey
+                        $reverseMapping[$shuffledKey] = $originalKey;
+                    }
+                    
+                    // Buat mapping: shuffled_key => original_key
+                    $optionMapping[$question->id] = $reverseMapping;
+                    
+                    // Clone question dan set pilihan yang sudah diacak
+                    $randomizedQuestion = clone $question;
+                    $randomizedQuestion->setAttribute('pilihan', $shuffledPilihan);
+                    $randomizedQuestions->push($randomizedQuestion);
+                } else {
+                    // Untuk essay, tidak perlu diacak
+                    $randomizedQuestions->push($question);
+                }
+            }
+            
+            // Simpan randomization ke session
+            $session->update([
+                'question_order' => $questionOrder,
+                'option_mapping' => $optionMapping,
+            ]);
+            
+            $quiz->setRelation('questions', $randomizedQuestions);
+        } else {
+            // Gunakan urutan yang sudah diacak
+            $questionOrder = $session->question_order;
+            $optionMapping = $session->option_mapping;
+            
+            // Reorder questions sesuai dengan question_order
+            $questionsById = $quiz->questions->keyBy('id');
+            $randomizedQuestions = collect();
+            
+            foreach ($questionOrder as $questionId) {
+                if (isset($questionsById[$questionId])) {
+                    $question = $questionsById[$questionId];
+                    
+                    // Apply option mapping jika ada
+                    if ($question->tipe == 'pilihan_ganda' && isset($optionMapping[$questionId]) && is_array($question->pilihan)) {
+                        $pilihan = $question->pilihan;
+                        $mapping = $optionMapping[$questionId];
+                        
+                        // Reorder pilihan sesuai mapping yang sudah disimpan
+                        $shuffledPilihan = [];
+                        foreach ($mapping as $shuffledKey => $originalKey) {
+                            if (isset($pilihan[$originalKey])) {
+                                $shuffledPilihan[$shuffledKey] = $pilihan[$originalKey];
+                            }
+                        }
+                        
+                        // Clone question dan set pilihan yang sudah diacak
+                        $randomizedQuestion = clone $question;
+                        $randomizedQuestion->setAttribute('pilihan', $shuffledPilihan);
+                        $randomizedQuestions->push($randomizedQuestion);
+                    } else {
+                        $randomizedQuestions->push($question);
+                    }
+                }
+            }
+            
+            $quiz->setRelation('questions', $randomizedQuestions);
+        }
 
         $remainingSeconds = $session->remainingSeconds();
 
@@ -116,9 +299,28 @@ class QuizController extends Controller
         $totalSoal = $quiz->questions->count();
         $jawabanBenar = 0;
         $totalSkor = 0;
+        
+        // Get option mapping from session if exists
+        $optionMapping = $session ? $session->option_mapping : [];
+        
+        // Convert all shuffled answers back to original before processing
+        $convertedJawaban = [];
+        foreach ($jawaban as $questionId => $userAnswer) {
+            if (isset($optionMapping[$questionId]) && is_array($optionMapping[$questionId])) {
+                $mapping = $optionMapping[$questionId];
+                // Convert shuffled key to original key
+                if (isset($mapping[$userAnswer])) {
+                    $convertedJawaban[$questionId] = $mapping[$userAnswer];
+                } else {
+                    $convertedJawaban[$questionId] = $userAnswer;
+                }
+            } else {
+                $convertedJawaban[$questionId] = $userAnswer;
+            }
+        }
 
         foreach ($quiz->questions as $question) {
-            $userAnswer = $jawaban[$question->id] ?? null;
+            $userAnswer = $convertedJawaban[$question->id] ?? null;
             
             if ($userAnswer && $userAnswer == $question->jawaban_benar) {
                 $jawabanBenar++;
@@ -127,6 +329,19 @@ class QuizController extends Controller
         }
 
         $nilai = ($totalSkor / ($totalSkor > 0 ? $totalSkor : 1)) * 100;
+
+        // Calculate attempt number
+        $previousAttempts = QuizResult::where('quiz_id', $quiz->id)
+            ->where('siswa_id', $user->id)
+            ->count();
+        
+        $attemptNumber = $previousAttempts + 1;
+
+        // Check if already reached max attempts
+        if ($attemptNumber > 3) {
+            return redirect()->route('siswa.quiz.index')
+                ->with('error', 'Anda sudah mencapai batas maksimal 3 kali attempt untuk quiz ini.');
+        }
 
         if ($session) {
             $remainingSeconds = $session->remainingSeconds($endTime);
@@ -156,6 +371,10 @@ class QuizController extends Controller
             $waktuPengerjaan = max(0, $endTime->diffInSeconds($startTime));
         }
 
+        // Get randomization data from session
+        $questionOrder = $session ? $session->question_order : null;
+        $optionMapping = $session ? $session->option_mapping : null;
+
         $result = QuizResult::create([
             'quiz_id' => $quiz->id,
             'siswa_id' => $user->id,
@@ -163,8 +382,10 @@ class QuizController extends Controller
             'total_soal' => $totalSoal,
             'jawaban_benar' => $jawabanBenar,
             'waktu_pengerjaan' => $waktuPengerjaan,
-            'attempt' => 1,
-            'jawaban' => $jawaban,
+            'attempt' => $attemptNumber,
+            'jawaban' => $convertedJawaban, // Save converted answers (original keys)
+            'question_order' => $questionOrder, // Save randomized question order
+            'option_mapping' => $optionMapping, // Save option mapping for display
         ]);
 
         // Process gamification
@@ -182,6 +403,67 @@ class QuizController extends Controller
             abort(403);
         }
 
-        return view('siswa.quiz.result', compact('result'));
+        // Apply randomization if exists
+        $questionOrder = $result->question_order;
+        $optionMapping = $result->option_mapping ?? [];
+        
+        // Create reverse mapping: original_key => shuffled_key for display
+        $reverseOptionMapping = [];
+        if (!empty($optionMapping) && is_array($optionMapping)) {
+            foreach ($optionMapping as $questionId => $mapping) {
+                if (is_array($mapping)) {
+                    $reverseOptionMapping[$questionId] = array_flip($mapping);
+                }
+            }
+        }
+
+        if (!empty($questionOrder) && is_array($questionOrder)) {
+            // Reorder questions sesuai dengan urutan yang diacak
+            $questionsById = $result->quiz->questions->keyBy('id');
+            $randomizedQuestions = collect();
+            
+            foreach ($questionOrder as $questionId) {
+                if (isset($questionsById[$questionId])) {
+                    $question = $questionsById[$questionId];
+                    
+                    // Apply option mapping jika ada
+                    if ($question->tipe == 'pilihan_ganda' && isset($optionMapping[$questionId]) && is_array($optionMapping[$questionId]) && is_array($question->pilihan)) {
+                        $pilihan = $question->pilihan;
+                        $mapping = $optionMapping[$questionId];
+                        $originalJawabanBenar = $question->jawaban_benar; // Simpan jawaban_benar asli
+                        
+                        // Reorder pilihan sesuai mapping yang sudah disimpan
+                        // Mapping: shuffled_key => original_key
+                        $shuffledPilihan = [];
+                        foreach ($mapping as $shuffledKey => $originalKey) {
+                            if (isset($pilihan[$originalKey])) {
+                                $shuffledPilihan[$shuffledKey] = $pilihan[$originalKey];
+                            }
+                        }
+                        
+                        // Clone question dan set pilihan yang sudah diacak
+                        // Juga set jawaban_benar yang sudah dikonversi ke shuffled key
+                        $randomizedQuestion = clone $question;
+                        $randomizedQuestion->setAttribute('pilihan', $shuffledPilihan);
+                        
+                        // Convert jawaban_benar to shuffled key
+                        if (isset($reverseOptionMapping[$questionId][$originalJawabanBenar])) {
+                            $randomizedQuestion->setAttribute('jawaban_benar', $reverseOptionMapping[$questionId][$originalJawabanBenar]);
+                        }
+                        
+                        // Simpan jawaban_benar asli untuk validasi
+                        $randomizedQuestion->setAttribute('original_jawaban_benar', $originalJawabanBenar);
+                        
+                        $randomizedQuestions->push($randomizedQuestion);
+                    } else {
+                        $randomizedQuestions->push($question);
+                    }
+                }
+            }
+            
+            $result->quiz->setRelation('questions', $randomizedQuestions);
+        }
+
+        return view('siswa.quiz.result', compact('result', 'reverseOptionMapping'));
     }
 }

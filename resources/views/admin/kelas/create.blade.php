@@ -8,18 +8,42 @@
 </div>
 
 <div class="rounded-lg shadow border border-gray-200 p-6" style="background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);">
-    <form action="{{ route('admin.kelas.store') }}" method="POST">
+    <form action="{{ route('admin.kelas.store') }}" method="POST" id="kelasForm">
         @csrf
         <div class="mb-4">
-            <label class="block mb-2 text-sm font-medium text-black text-black">Nama</label>
-            <input type="text" name="nama" value="{{ old('nama') }}" required
-                   class="bg-white border border-gray-300 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 text-black">
+            <label class="block mb-2 text-sm font-medium text-black">Kelas</label>
+            <select name="kelas_number" id="kelasNumber" required
+                    class="bg-white border border-gray-300 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                <option value="">Pilih Kelas</option>
+                @for($i = 1; $i <= 12; $i++)
+                    <option value="{{ $i }}" {{ old('kelas_number') == $i ? 'selected' : '' }}>
+                        Kelas {{ $i }}
+                    </option>
+                @endfor
+            </select>
+            <input type="hidden" name="nama" id="namaKelas" value="{{ old('nama') }}">
+            @error('nama') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+        </div>
+
+        <div class="mb-4" id="jurusanField" style="display: none;">
+            <label class="block mb-2 text-sm font-medium text-black">Jurusan yang Tersedia</label>
+            <div class="space-y-2">
+                <label class="flex items-center">
+                    <input type="checkbox" name="jurusan[]" value="IPA" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                    <span class="ml-2 text-sm text-black">IPA</span>
+                </label>
+                <label class="flex items-center">
+                    <input type="checkbox" name="jurusan[]" value="IPS" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                    <span class="ml-2 text-sm text-black">IPS</span>
+                </label>
+            </div>
+            <p class="mt-1 text-xs text-gray-500">Pilih jurusan yang tersedia untuk kelas 10-12</p>
         </div>
 
         <div class="mb-4">
-            <label class="block mb-2 text-sm font-medium text-black text-black">Deskripsi</label>
+            <label class="block mb-2 text-sm font-medium text-black">Deskripsi</label>
             <textarea name="deskripsi" rows="3"
-                      class="bg-white border border-gray-300 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 text-black">{{ old('deskripsi') }}</textarea>
+                      class="bg-white border border-gray-300 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">{{ old('deskripsi') }}</textarea>
         </div>
 
         <div class="flex gap-3">
@@ -28,5 +52,34 @@
         </div>
     </form>
 </div>
+
+<script>
+document.getElementById('kelasNumber').addEventListener('change', function() {
+    const kelasNumber = parseInt(this.value);
+    const namaKelas = document.getElementById('namaKelas');
+    const jurusanField = document.getElementById('jurusanField');
+    
+    // Set nama kelas
+    if (kelasNumber) {
+        namaKelas.value = 'Kelas ' + kelasNumber;
+    } else {
+        namaKelas.value = '';
+    }
+    
+    // Show/hide jurusan field
+    if (kelasNumber >= 10 && kelasNumber <= 12) {
+        jurusanField.style.display = 'block';
+    } else {
+        jurusanField.style.display = 'none';
+        // Uncheck all jurusan checkboxes
+        document.querySelectorAll('input[name="jurusan[]"]').forEach(cb => cb.checked = false);
+    }
+});
+
+// Trigger on load if old value exists
+if (document.getElementById('kelasNumber').value) {
+    document.getElementById('kelasNumber').dispatchEvent(new Event('change'));
+}
+</script>
 @endsection
 

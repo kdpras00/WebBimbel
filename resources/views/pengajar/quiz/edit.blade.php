@@ -33,6 +33,26 @@
                            class="bg-white border border-gray-300 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
                 </div>
 
+                @php
+                    $kelasNama = $quiz->mapel->kelas->nama ?? '';
+                    $kelasMatch = preg_match('/\d+/', $kelasNama, $matches);
+                    $kelasNumber = $kelasMatch ? (int)$matches[0] : 0;
+                    $showJurusan = $kelasNumber >= 10 && $kelasNumber <= 12;
+                @endphp
+                <div class="mb-4" id="jurusanField" style="display: {{ $showJurusan ? 'block' : 'none' }};">
+                    <label class="block mb-2 text-sm font-medium text-black">Jurusan <span class="text-red-500">*</span></label>
+                    <select name="jurusan" id="jurusanSelect" {{ $showJurusan ? 'required' : '' }}
+                            class="bg-white border border-gray-300 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                        <option value="">Pilih Jurusan</option>
+                        @foreach($jurusanOptions as $jurusan)
+                            <option value="{{ $jurusan }}" {{ old('jurusan', $quiz->jurusan) == $jurusan ? 'selected' : '' }}>
+                                {{ $jurusan }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <p class="mt-1 text-sm text-gray-500">Pilih jurusan untuk kelas 10-12. Field ini hanya muncul untuk kelas 10, 11, dan 12.</p>
+                </div>
+
                 <div class="mb-4">
                     <div class="flex items-center">
                         <input type="checkbox" name="is_published" id="is_published" value="1" {{ $quiz->is_published ? 'checked' : '' }}

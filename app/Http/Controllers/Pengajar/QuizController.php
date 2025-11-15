@@ -30,7 +30,9 @@ class QuizController extends Controller
             ->with('kelas')
             ->get();
 
-        return view('pengajar.quiz.create', compact('mapel'));
+        $jurusanOptions = ['IPA', 'IPS'];
+
+        return view('pengajar.quiz.create', compact('mapel', 'jurusanOptions'));
     }
 
     public function store(Request $request)
@@ -41,7 +43,26 @@ class QuizController extends Controller
             'mapel_id' => 'required|exists:mapel,id',
             'durasi' => 'nullable|integer|min:1',
             'is_published' => 'boolean',
+            'jurusan' => 'nullable|string|max:50',
         ]);
+
+        // Validasi jurusan berdasarkan kelas
+        $mapel = \App\Models\Mapel::with('kelas')->findOrFail($validated['mapel_id']);
+        $kelasNama = $mapel->kelas->nama ?? '';
+        preg_match('/\d+/', $kelasNama, $matches);
+        $kelasNumber = !empty($matches) ? (int)$matches[0] : 0;
+
+        // Jika kelas 1-9, jurusan harus kosong
+        if ($kelasNumber >= 1 && $kelasNumber <= 9) {
+            $validated['jurusan'] = null;
+        } elseif ($kelasNumber >= 10 && $kelasNumber <= 12) {
+            // Jika kelas 10-12, jurusan harus diisi (tidak boleh kosong)
+            if (empty($validated['jurusan'])) {
+                return redirect()->back()
+                    ->withInput()
+                    ->withErrors(['jurusan' => 'Jurusan harus dipilih untuk kelas 10-12.']);
+            }
+        }
 
         $validated['pengajar_id'] = Auth::id();
         $validated['is_published'] = $request->has('is_published');
@@ -56,21 +77,44 @@ class QuizController extends Controller
     {
         $quiz = Quiz::where('pengajar_id', Auth::id())
             ->with('questions')
+            ->with('mapel.kelas')
             ->findOrFail($id);
 
-        return view('pengajar.quiz.edit', compact('quiz'));
+        $jurusanOptions = ['IPA', 'IPS'];
+
+        return view('pengajar.quiz.edit', compact('quiz', 'jurusanOptions'));
     }
 
     public function update(Request $request, $id)
     {
-        $quiz = Quiz::where('pengajar_id', Auth::id())->findOrFail($id);
+        $quiz = Quiz::where('pengajar_id', Auth::id())
+            ->with('mapel.kelas')
+            ->findOrFail($id);
 
         $validated = $request->validate([
             'judul' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
             'durasi' => 'nullable|integer|min:1',
             'is_published' => 'boolean',
+            'jurusan' => 'nullable|string|max:50',
         ]);
+
+        // Validasi jurusan berdasarkan kelas dari quiz yang sudah ada
+        $kelasNama = $quiz->mapel->kelas->nama ?? '';
+        preg_match('/\d+/', $kelasNama, $matches);
+        $kelasNumber = !empty($matches) ? (int)$matches[0] : 0;
+
+        // Jika kelas 1-9, jurusan harus kosong
+        if ($kelasNumber >= 1 && $kelasNumber <= 9) {
+            $validated['jurusan'] = null;
+        } elseif ($kelasNumber >= 10 && $kelasNumber <= 12) {
+            // Jika kelas 10-12, jurusan harus diisi (tidak boleh kosong)
+            if (empty($validated['jurusan'])) {
+                return redirect()->back()
+                    ->withInput()
+                    ->withErrors(['jurusan' => 'Jurusan harus dipilih untuk kelas 10-12.']);
+            }
+        }
 
         $validated['is_published'] = $request->has('is_published');
 

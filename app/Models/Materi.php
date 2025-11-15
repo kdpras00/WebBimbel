@@ -17,6 +17,7 @@ class Materi extends Model
         'konten',
         'mapel_id',
         'pengajar_id',
+        'jurusan',
     ];
 
     public function mapel(): BelongsTo

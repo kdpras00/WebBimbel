@@ -18,15 +18,31 @@
 
         <div class="mb-4">
             <label class="block mb-2 text-sm font-medium text-black">Mata Pelajaran</label>
-            <select name="mapel_id" required
+            <select name="mapel_id" id="mapel_id" required
                     class="bg-white border border-gray-300 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
                 <option value="">Pilih Mata Pelajaran</option>
                 @foreach($mapel as $m)
-                    <option value="{{ $m->id }}" {{ old('mapel_id') == $m->id ? 'selected' : '' }}>
+                    <option value="{{ $m->id }}" 
+                            data-kelas="{{ $m->kelas->nama }}"
+                            {{ old('mapel_id') == $m->id ? 'selected' : '' }}>
                         {{ $m->nama }} - {{ $m->kelas->nama }}
                     </option>
                 @endforeach
             </select>
+        </div>
+
+        <div class="mb-4" id="jurusanField" style="display: none;">
+            <label class="block mb-2 text-sm font-medium text-black">Jurusan <span class="text-red-500">*</span></label>
+            <select name="jurusan" id="jurusanSelect"
+                    class="bg-white border border-gray-300 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                <option value="">Pilih Jurusan</option>
+                @foreach($jurusanOptions as $jurusan)
+                    <option value="{{ $jurusan }}" {{ old('jurusan') == $jurusan ? 'selected' : '' }}>
+                        {{ $jurusan }}
+                    </option>
+                @endforeach
+            </select>
+            <p class="mt-1 text-sm text-gray-500">Pilih jurusan untuk kelas 10-12. Field ini hanya muncul untuk kelas 10, 11, dan 12.</p>
         </div>
 
         <div class="mb-4">
@@ -57,5 +73,39 @@
         </div>
     </form>
 </div>
+
+<script>
+// Show/hide jurusan field based on kelas
+function toggleJurusanField() {
+    const selectedOption = document.getElementById('mapel_id').options[document.getElementById('mapel_id').selectedIndex];
+    const kelasNama = selectedOption ? selectedOption.getAttribute('data-kelas') : '';
+    const jurusanField = document.getElementById('jurusanField');
+    const jurusanSelect = document.getElementById('jurusanSelect');
+    
+    // Extract kelas number from nama (e.g., "Kelas 10" -> 10)
+    const kelasMatch = kelasNama.match(/\d+/);
+    const kelasNumber = kelasMatch ? parseInt(kelasMatch[0]) : 0;
+    
+    // Show jurusan field only for kelas 10, 11, 12
+    if (kelasNumber >= 10 && kelasNumber <= 12) {
+        jurusanField.style.display = 'block';
+        if (jurusanSelect) {
+            jurusanSelect.setAttribute('required', 'required');
+        }
+    } else {
+        jurusanField.style.display = 'none';
+        // Reset jurusan value for kelas 1-9
+        if (jurusanSelect) {
+            jurusanSelect.value = '';
+            jurusanSelect.removeAttribute('required');
+        }
+    }
+}
+
+document.getElementById('mapel_id').addEventListener('change', toggleJurusanField);
+
+// Trigger on load
+toggleJurusanField();
+</script>
 @endsection
 

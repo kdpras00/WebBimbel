@@ -46,6 +46,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
     Route::resource('users', AdminUserController::class);
     Route::resource('kelas', AdminKelasController::class);
+    Route::post('/kelas/{id}/assign-pengajar', [AdminKelasController::class, 'assignPengajar'])->name('kelas.assign-pengajar');
+    Route::post('/kelas/{id}/unassign-pengajar', [AdminKelasController::class, 'unassignPengajar'])->name('kelas.unassign-pengajar');
+    Route::post('/kelas/{id}/assign-siswa', [AdminKelasController::class, 'assignSiswa'])->name('kelas.assign-siswa');
+    Route::post('/kelas/{id}/unassign-siswa', [AdminKelasController::class, 'unassignSiswa'])->name('kelas.unassign-siswa');
     Route::resource('mapel', AdminMapelController::class);
     Route::get('/gamification', [AdminGamificationController::class, 'index'])->name('gamification.index');
     Route::post('/gamification', [AdminGamificationController::class, 'store'])->name('gamification.store');
