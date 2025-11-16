@@ -55,6 +55,16 @@
     </div>
 </div>
 
+<!-- Date and Time Info -->
+<div class="mb-6 rounded-lg shadow border border-gray-200 p-4" style="background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);">
+    <div class="flex items-center text-black">
+        <svg class="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+        </svg>
+        <span class="text-sm font-medium">Tanggal Pengerjaan: {{ $result->created_at->format('d F Y') }} pukul {{ $result->created_at->format('H:i') }} WIB</span>
+    </div>
+</div>
+
 <div class="rounded-lg shadow border border-gray-200 p-6" style="background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);">
     <h2 class="text-xl font-bold mb-4 text-black">Review Jawaban</h2>
     

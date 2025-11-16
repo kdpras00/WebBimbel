@@ -3,9 +3,11 @@
 @section('title', 'Progress Belajar')
 
 @section('content')
-<div class="mb-6">
-    <h1 class="text-3xl font-bold text-white">Progress Belajar</h1>
-    <p class="mt-2 text-gray-100">Lihat perkembangan nilai dan hasil belajar Anda</p>
+<div class="mb-6 flex justify-between items-center">
+    <div>
+        <h1 class="text-3xl font-bold text-white">Progress Belajar</h1>
+        <p class="mt-2 text-gray-100">Lihat perkembangan nilai dan hasil belajar Anda</p>
+    </div>
 </div>
 
 @if($results->count() > 0)
@@ -45,6 +47,7 @@
                         <th scope="col" class="px-6 py-3">Nilai</th>
                         <th scope="col" class="px-6 py-3">Jawaban Benar</th>
                         <th scope="col" class="px-6 py-3">Tanggal</th>
+                        <th scope="col" class="px-6 py-3">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -65,6 +68,16 @@
                             </td>
                             <td class="px-6 py-4 text-black align-middle">{{ $result->jawaban_benar }}/{{ $result->total_soal }}</td>
                             <td class="px-6 py-4 text-black align-middle whitespace-nowrap">{{ $result->created_at->format('d M Y H:i') }}</td>
+                            <td class="px-6 py-4 align-middle">
+                                <a href="{{ route('siswa.quiz.result', $result->id) }}" 
+                                   class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-2 focus:outline-none focus:ring-blue-300">
+                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                    </svg>
+                                    Lihat Detail
+                                </a>
+                            </td>
                         </tr>
                     @endforeach
                 </tbody>

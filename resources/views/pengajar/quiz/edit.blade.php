@@ -4,31 +4,31 @@
 
 @section('content')
 <div class="mb-6">
-    <h1 class="text-3xl font-bold text-black">Edit Quiz: {{ $quiz->judul }}</h1>
+    <h1 class="text-3xl font-bold text-white">Edit Quiz: {{ $quiz->judul }}</h1>
 </div>
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <!-- Quiz Info -->
     <div class="lg:col-span-2">
         <div class="rounded-lg shadow border border-gray-200 p-6 mb-6 style="background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);">
-            <h2 class="text-xl font-semibold mb-4 text-black">Informasi Quiz</h2>
+            <h2 class="text-xl font-semibold mb-4 text-white">Informasi Quiz</h2>
             <form action="{{ route('pengajar.quiz.update', $quiz->id) }}" method="POST">
                 @csrf
                 @method('PUT')
                 <div class="mb-4">
-                    <label class="block mb-2 text-sm font-medium text-black">Judul</label>
+                    <label class="block mb-2 text-sm font-medium text-white">Judul</label>
                     <input type="text" name="judul" value="{{ old('judul', $quiz->judul) }}" required
                            class="bg-white border border-gray-300 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
                 </div>
 
                 <div class="mb-4">
-                    <label class="block mb-2 text-sm font-medium text-black">Deskripsi</label>
+                    <label class="block mb-2 text-sm font-medium text-white">Deskripsi</label>
                     <textarea name="deskripsi" rows="3"
                               class="bg-white border border-gray-300 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">{{ old('deskripsi', $quiz->deskripsi) }}</textarea>
                 </div>
 
                 <div class="mb-4">
-                    <label class="block mb-2 text-sm font-medium text-black">Durasi (menit)</label>
+                    <label class="block mb-2 text-sm font-medium text-white">Durasi (menit)</label>
                     <input type="number" name="durasi" value="{{ old('durasi', $quiz->durasi) }}" min="1"
                            class="bg-white border border-gray-300 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
                 </div>
@@ -57,7 +57,7 @@
                     <div class="flex items-center">
                         <input type="checkbox" name="is_published" id="is_published" value="1" {{ $quiz->is_published ? 'checked' : '' }}
                                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
-                        <label for="is_published" class="ml-2 text-sm font-medium text-black">
+                        <label for="is_published" class="ml-2 text-sm font-medium text-white">
                             Publish Quiz
                         </label>
                     </div>
@@ -88,7 +88,7 @@
                         <form action="{{ route('pengajar.quiz.questions.destroy', [$quiz->id, $question->id]) }}" method="POST" class="ml-4">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="text-red-600 hover:underline text-sm" onclick="return confirm('Yakin ingin menghapus?')">Hapus</button>
+                            <button type="submit" class="text-red-600 hover:underline text-sm" onclick="confirmDelete(event, 'Yakin ingin menghapus soal ini?')">Hapus</button>
                         </form>
                     </div>
                 </div>
@@ -127,13 +127,13 @@
                 <div class="mb-4" id="pilihanContainer">
                     <label class="block mb-2 text-sm font-medium text-black">Pilihan Jawaban</label>
                     <div class="space-y-2">
-                        <input type="text" name="pilihan[A]" id="pilihanA" placeholder="A. ..." required
+                        <input type="text" name="pilihan[A]" id="pilihanA" placeholder="A. ..."
                                class="bg-white border border-gray-300 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 pilihan-input">
-                        <input type="text" name="pilihan[B]" id="pilihanB" placeholder="B. ..." required
+                        <input type="text" name="pilihan[B]" id="pilihanB" placeholder="B. ..."
                                class="bg-white border border-gray-300 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 pilihan-input">
-                        <input type="text" name="pilihan[C]" id="pilihanC" placeholder="C. ..." required
+                        <input type="text" name="pilihan[C]" id="pilihanC" placeholder="C. ..."
                                class="bg-white border border-gray-300 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 pilihan-input">
-                        <input type="text" name="pilihan[D]" id="pilihanD" placeholder="D. ..." required
+                        <input type="text" name="pilihan[D]" id="pilihanD" placeholder="D. ..."
                                class="bg-white border border-gray-300 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 pilihan-input">
                     </div>
                     <p class="mt-2 text-xs text-red-600 hidden" id="errorMessage">Semua pilihan jawaban harus berbeda!</p>
@@ -162,7 +162,7 @@
                            class="bg-white border border-gray-300 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
                 </div>
 
-                <button type="submit" class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                <button type="submit" id="submitQuestionBtn" class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
                     Tambah Soal
                 </button>
             </form>
@@ -229,15 +229,24 @@ function toggleJawabanBenar(tipe) {
 document.getElementById('questionType').addEventListener('change', function() {
     const tipe = this.value;
     const pilihanContainer = document.getElementById('pilihanContainer');
+    const pilihanInputs = document.querySelectorAll('.pilihan-input');
     
     if (tipe === 'pilihan_ganda') {
         pilihanContainer.style.display = 'block';
         toggleJawabanBenar('pilihan_ganda');
+        // Set required untuk pilihan ganda
+        pilihanInputs.forEach(input => {
+            input.setAttribute('required', 'required');
+        });
         // Re-setup validation listeners after DOM update
         setTimeout(setupValidationListeners, 50);
     } else {
         pilihanContainer.style.display = 'none';
         toggleJawabanBenar('essay');
+        // Hapus required untuk essay
+        pilihanInputs.forEach(input => {
+            input.removeAttribute('required');
+        });
     }
 });
 
@@ -305,16 +314,97 @@ document.getElementById('questionForm').addEventListener('submit', function(e) {
     const questionType = document.getElementById('questionType').value;
     
     if (questionType === 'pilihan_ganda') {
-        // Check if pilihan inputs exist
-        const pilihanInputs = document.querySelectorAll('.pilihan-input');
-        if (pilihanInputs.length > 0) {
-            if (!validatePilihan()) {
-                e.preventDefault();
-                alert('Semua pilihan jawaban harus berbeda!');
-                return false;
+        // Check if pilihan inputs exist and are visible
+        const pilihanContainer = document.getElementById('pilihanContainer');
+        if (pilihanContainer.style.display !== 'none') {
+            const pilihanInputs = document.querySelectorAll('.pilihan-input');
+            if (pilihanInputs.length > 0) {
+                // Check if all pilihan are filled
+                let allFilled = true;
+                pilihanInputs.forEach(input => {
+                    if (!input.value.trim()) {
+                        allFilled = false;
+                    }
+                });
+                
+                if (!allFilled) {
+                    e.preventDefault();
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: 'Semua pilihan jawaban harus diisi!',
+                        confirmButtonColor: '#dc2626'
+                    });
+                    return false;
+                }
+                
+                if (!validatePilihan()) {
+                    e.preventDefault();
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: 'Semua pilihan jawaban harus berbeda!',
+                        confirmButtonColor: '#dc2626'
+                    });
+                    return false;
+                }
             }
         }
+    } else if (questionType === 'essay') {
+        // Untuk essay, pastikan jawaban benar diisi
+        const jawabanBenar = document.getElementById('jawabanBenar');
+        if (!jawabanBenar || !jawabanBenar.value.trim()) {
+            e.preventDefault();
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: 'Jawaban benar harus diisi!',
+                confirmButtonColor: '#dc2626'
+            });
+            return false;
+        }
     }
+});
+
+// Enable submit button for essay type
+document.getElementById('questionType').addEventListener('change', function() {
+    const submitBtn = document.getElementById('submitQuestionBtn');
+    if (this.value === 'essay') {
+        submitBtn.disabled = false;
+        submitBtn.style.opacity = '1';
+        submitBtn.style.cursor = 'pointer';
+    } else {
+        submitBtn.disabled = false;
+        submitBtn.style.opacity = '1';
+        submitBtn.style.cursor = 'pointer';
+    }
+});
+
+// Initialize form state on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const questionType = document.getElementById('questionType').value;
+    const submitBtn = document.getElementById('submitQuestionBtn');
+    const pilihanContainer = document.getElementById('pilihanContainer');
+    const pilihanInputs = document.querySelectorAll('.pilihan-input');
+    
+    // Initialize based on current type
+    if (questionType === 'essay') {
+        pilihanContainer.style.display = 'none';
+        pilihanInputs.forEach(input => {
+            input.removeAttribute('required');
+        });
+        toggleJawabanBenar('essay');
+    } else {
+        pilihanContainer.style.display = 'block';
+        pilihanInputs.forEach(input => {
+            input.setAttribute('required', 'required');
+        });
+        toggleJawabanBenar('pilihan_ganda');
+    }
+    
+    submitBtn.disabled = false;
+    submitBtn.style.opacity = '1';
+    submitBtn.style.cursor = 'pointer';
 });
 </script>
 @endsection

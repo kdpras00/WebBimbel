@@ -55,6 +55,20 @@
             </select>
         </div>
 
+        <div class="mb-4" id="siswaField" style="display: none;">
+            <label class="block mb-2 text-sm font-medium text-black">Siswa (jika wali)</label>
+            <select name="siswa_id"
+                    class="bg-white border border-gray-300 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                <option value="">Pilih Siswa</option>
+                @php
+                    $siswas = \App\Models\User::where('role', 'siswa')->get();
+                @endphp
+                @foreach($siswas as $siswa)
+                    <option value="{{ $siswa->id }}" {{ old('siswa_id') == $siswa->id ? 'selected' : '' }}>{{ $siswa->name }}</option>
+                @endforeach
+            </select>
+        </div>
+
         <div class="mb-4" id="kelasField" style="display: none;">
             <label class="block mb-2 text-sm font-medium text-black">Kelas</label>
             <select name="kelas_id" id="kelasSelect"
@@ -96,18 +110,29 @@
 function toggleSiswaFields() {
     const role = document.querySelector('select[name="role"]').value;
     const waliField = document.getElementById('waliField');
+    const siswaField = document.getElementById('siswaField');
     const kelasField = document.getElementById('kelasField');
     const jurusanField = document.getElementById('jurusanField');
     
     if (role === 'siswa') {
         waliField.style.display = 'block';
         kelasField.style.display = 'block';
+        siswaField.style.display = 'none';
+    } else if (role === 'wali') {
+        siswaField.style.display = 'block';
+        waliField.style.display = 'none';
+        kelasField.style.display = 'none';
+        jurusanField.style.display = 'none';
     } else {
         waliField.style.display = 'none';
+        siswaField.style.display = 'none';
         kelasField.style.display = 'none';
         jurusanField.style.display = 'none';
         // Reset values
         document.querySelector('select[name="wali_id"]').value = '';
+        if (document.querySelector('select[name="siswa_id"]')) {
+            document.querySelector('select[name="siswa_id"]').value = '';
+        }
         document.getElementById('kelasSelect').value = '';
         document.getElementById('jurusanSelect').value = '';
     }

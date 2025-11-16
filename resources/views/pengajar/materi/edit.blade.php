@@ -4,10 +4,26 @@
 
 @section('content')
 <div class="mb-6">
-    <h1 class="text-3xl font-bold text-black">Edit Materi</h1>
+    <h1 class="text-3xl font-bold text-white">Edit Materi</h1>
 </div>
 
 <div class="rounded-lg shadow border border-gray-200 p-6" style="background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);">
+    @if($errors->any())
+        <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div class="flex items-center mb-2">
+                <svg class="w-5 h-5 text-red-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <h3 class="text-red-800 font-semibold">Terjadi Kesalahan!</h3>
+            </div>
+            <ul class="list-disc list-inside text-sm text-red-700">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+    
     <form action="{{ route('pengajar.materi.update', $materi->id) }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PUT')
@@ -62,7 +78,10 @@
             @endif
             <input type="file" name="file_path" id="fileInputField"
                    class="block w-full text-sm text-black border border-gray-300 rounded-lg cursor-pointer bg-white focus:outline-none">
-            <p class="mt-1 text-sm text-gray-500">Kosongkan jika tidak ingin mengubah file</p>
+            <p class="mt-1 text-sm text-gray-500">
+                <span class="font-semibold text-red-600">Maksimal 2 MB</span> - Kosongkan jika tidak ingin mengubah file
+            </p>
+            <div id="fileInfo"></div>
         </div>
 
         <div class="mb-4" id="textInput">
@@ -78,55 +97,74 @@
         </div>
 
         <div class="flex gap-3">
-            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Update</button>
+            <button type="submit" id="submitBtn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                <span id="submitText">Update</span>
+                <span id="submitLoader" class="hidden">
+                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Mengupload...
+                </span>
+            </button>
             <a href="{{ route('pengajar.materi.index') }}" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400">Batal</a>
         </div>
     </form>
 </div>
 
 <script>
-document.getElementById('tipe').addEventListener('change', function() {
-    const tipe = this.value;
-    const fileInput = document.getElementById('fileInput');
-    const textInput = document.getElementById('textInput');
-    const fileInputField = document.getElementById('fileInputField');
-    const fileLabel = document.getElementById('fileLabel');
-    
-    if (tipe === 'teks') {
-        fileInput.style.display = 'none';
-        textInput.style.display = 'block';
-    } else if (tipe === 'pdf') {
-        fileInput.style.display = 'block';
-        textInput.style.display = 'none';
-        fileInputField.setAttribute('accept', '.pdf');
-        fileLabel.innerHTML = 'File PDF';
-    } else if (tipe === 'video') {
-        fileInput.style.display = 'block';
-        textInput.style.display = 'none';
-        fileInputField.setAttribute('accept', '.mp4,.avi,.mov');
-        fileLabel.innerHTML = 'File Video';
-    }
-});
+const tipeSelect = document.getElementById('tipe');
+if (tipeSelect) {
+    tipeSelect.addEventListener('change', function() {
+        const tipe = this.value;
+        const fileInput = document.getElementById('fileInput');
+        const textInput = document.getElementById('textInput');
+        const fileInputField = document.getElementById('fileInputField');
+        const fileLabel = document.getElementById('fileLabel');
+        
+        if (!fileInput || !textInput || !fileInputField || !fileLabel) return;
+        
+        if (tipe === 'teks') {
+            fileInput.style.display = 'none';
+            textInput.style.display = 'block';
+            fileInputField.removeAttribute('required');
+        } else if (tipe === 'pdf') {
+            fileInput.style.display = 'block';
+            textInput.style.display = 'none';
+            fileInputField.setAttribute('accept', '.pdf');
+            fileLabel.innerHTML = 'File PDF';
+        } else if (tipe === 'video') {
+            fileInput.style.display = 'block';
+            textInput.style.display = 'none';
+            fileInputField.setAttribute('accept', '.mp4,.avi,.mov');
+            fileLabel.innerHTML = 'File Video';
+        }
+    });
+}
 
 // Show/hide jurusan field based on kelas
 function toggleJurusanField() {
-    const selectedOption = document.getElementById('mapel_id').options[document.getElementById('mapel_id').selectedIndex];
-    const kelasNama = selectedOption ? selectedOption.getAttribute('data-kelas') : '';
+    const mapelSelect = document.getElementById('mapel_id');
+    if (!mapelSelect) return;
+    
+    const selectedIndex = mapelSelect.selectedIndex;
+    const selectedOption = mapelSelect.options[selectedIndex];
+    const kelasNama = selectedOption && selectedOption.getAttribute('data-kelas') ? selectedOption.getAttribute('data-kelas') : '';
     const jurusanField = document.getElementById('jurusanField');
     const jurusanSelect = document.getElementById('jurusanSelect');
     
     // Extract kelas number from nama (e.g., "Kelas 10" -> 10)
-    const kelasMatch = kelasNama.match(/\d+/);
+    const kelasMatch = kelasNama && typeof kelasNama === 'string' ? kelasNama.match(/\d+/) : null;
     const kelasNumber = kelasMatch ? parseInt(kelasMatch[0]) : 0;
     
     // Show jurusan field only for kelas 10, 11, 12
     if (kelasNumber >= 10 && kelasNumber <= 12) {
-        jurusanField.style.display = 'block';
+        if (jurusanField) jurusanField.style.display = 'block';
         if (jurusanSelect) {
             jurusanSelect.setAttribute('required', 'required');
         }
     } else {
-        jurusanField.style.display = 'none';
+        if (jurusanField) jurusanField.style.display = 'none';
         // Reset jurusan value for kelas 1-9
         if (jurusanSelect) {
             jurusanSelect.value = '';
@@ -135,13 +173,20 @@ function toggleJurusanField() {
     }
 }
 
-document.getElementById('mapel_id').addEventListener('change', toggleJurusanField);
+const mapelSelect = document.getElementById('mapel_id');
+if (mapelSelect) {
+    mapelSelect.addEventListener('change', toggleJurusanField);
+}
 
 // Initialize on load
 function initializeFileInput() {
-    const tipe = document.getElementById('tipe').value;
+    const tipeSelect = document.getElementById('tipe');
     const fileInputField = document.getElementById('fileInputField');
     const fileLabel = document.getElementById('fileLabel');
+    
+    if (!tipeSelect || !fileInputField || !fileLabel) return;
+    
+    const tipe = tipeSelect.value;
     
     if (tipe === 'pdf') {
         fileInputField.setAttribute('accept', '.pdf');
@@ -152,10 +197,155 @@ function initializeFileInput() {
     }
 }
 
-// Trigger on load
-document.getElementById('tipe').dispatchEvent(new Event('change'));
-toggleJurusanField();
-initializeFileInput();
+// Trigger on load - wait for DOM to be fully ready
+document.addEventListener('DOMContentLoaded', function() {
+    const tipeSelect = document.getElementById('tipe');
+    if (tipeSelect) {
+        tipeSelect.dispatchEvent(new Event('change'));
+    }
+    toggleJurusanField();
+    initializeFileInput();
+});
+
+// File size validation - Improved version
+function validateFileSize(input) {
+    if (!input || !input.files || input.files.length === 0) {
+        return true;
+    }
+    
+    const file = input.files[0];
+    if (!file) {
+        return true;
+    }
+    
+    const fileSizeMB = file.size / (1024 * 1024);
+    const maxSizeMB = 10;
+    
+    if (fileSizeMB > maxSizeMB) {
+        Swal.fire({
+            icon: 'error',
+            title: 'File Terlalu Besar!',
+            html: `<div class="text-left">
+                <p class="mb-2">Ukuran file: <strong>${fileSizeMB.toFixed(2)} MB</strong></p>
+                <p class="mb-2">Batas maksimal: <strong>${maxSizeMB} MB</strong></p>
+                <p class="text-sm text-gray-600 mt-3">Silakan pilih file yang lebih kecil atau kompres file Anda terlebih dahulu.</p>
+            </div>`,
+            confirmButtonColor: '#dc2626',
+            confirmButtonText: 'OK'
+        });
+        input.value = '';
+        
+        // Remove file info if exists
+        const fileInfo = document.getElementById('fileInfo');
+        if (fileInfo) {
+            fileInfo.remove();
+        }
+        
+        return false;
+    }
+    
+    // Show file info
+    let fileInfo = document.getElementById('fileInfo');
+    if (!fileInfo) {
+        fileInfo = document.createElement('p');
+        fileInfo.id = 'fileInfo';
+        fileInfo.className = 'mt-2 text-sm';
+        input.parentNode.appendChild(fileInfo);
+    }
+    
+    if (fileSizeMB < maxSizeMB) {
+        fileInfo.className = 'mt-2 text-sm text-green-600';
+        fileInfo.textContent = `✓ File: ${file.name} (${fileSizeMB.toFixed(2)} MB)`;
+    } else {
+        fileInfo.className = 'mt-2 text-sm text-red-600';
+        fileInfo.textContent = `✗ File terlalu besar: ${fileSizeMB.toFixed(2)} MB`;
+    }
+    
+    return true;
+}
+
+const fileInputField = document.getElementById('fileInputField');
+if (fileInputField) {
+    fileInputField.addEventListener('change', function(e) {
+        validateFileSize(e.target);
+    });
+}
+
+// Helper function to reset loading indicator
+function resetLoadingIndicator() {
+    const submitBtn = document.getElementById('submitBtn');
+    const submitText = document.getElementById('submitText');
+    const submitLoader = document.getElementById('submitLoader');
+    if (submitBtn && submitText && submitLoader) {
+        submitBtn.disabled = false;
+        submitText.classList.remove('hidden');
+        submitLoader.classList.add('hidden');
+    }
+}
+
+// Form submit handler with better error handling
+const form = document.querySelector('form');
+if (form) {
+    let submitTimeout = null;
+    
+    form.addEventListener('submit', function(e) {
+        const fileInput = document.getElementById('fileInputField');
+        const submitBtn = document.getElementById('submitBtn');
+        const submitText = document.getElementById('submitText');
+        const submitLoader = document.getElementById('submitLoader');
+        const tipeSelect = document.getElementById('tipe');
+        
+        // Validate file size before submit
+        if (fileInput && fileInput.files.length > 0) {
+            if (!validateFileSize(fileInput)) {
+                e.preventDefault();
+                return false;
+            }
+        }
+        
+        // Show loading indicator
+        if (submitBtn && submitText && submitLoader) {
+            submitBtn.disabled = true;
+            submitText.classList.add('hidden');
+            submitLoader.classList.remove('hidden');
+        }
+        
+        // Reset loading indicator after timeout (in case of error or no response)
+        if (submitTimeout) clearTimeout(submitTimeout);
+        submitTimeout = setTimeout(function() {
+            resetLoadingIndicator();
+            Swal.fire({
+                icon: 'warning',
+                title: 'Upload Gagal!',
+                html: 'Upload memakan waktu terlalu lama atau terjadi error.<br><br>' +
+                      'Kemungkinan penyebab:<br>' +
+                      '1. Ukuran file terlalu besar (maksimal 2 MB)<br>' +
+                      '2. Konfigurasi PHP belum diubah<br>' +
+                      '3. Koneksi internet lambat<br><br>' +
+                      'Pastikan <b>post_max_size</b> dan <b>upload_max_filesize</b> di php.ini XAMPP minimal 12M, lalu restart Apache.',
+                confirmButtonColor: '#dc2626'
+            });
+        }, 30000); // 30 seconds timeout
+    });
+    
+    // Reset loading indicator when page becomes visible again (handles back button, etc)
+    document.addEventListener('visibilitychange', function() {
+        if (!document.hidden) {
+            resetLoadingIndicator();
+            if (submitTimeout) {
+                clearTimeout(submitTimeout);
+                submitTimeout = null;
+            }
+        }
+    });
+    
+    // Reset loading indicator on page unload
+    window.addEventListener('beforeunload', function() {
+        if (submitTimeout) {
+            clearTimeout(submitTimeout);
+        }
+    });
+}
 </script>
 @endsection
 

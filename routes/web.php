@@ -53,6 +53,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::resource('mapel', AdminMapelController::class);
     Route::get('/gamification', [AdminGamificationController::class, 'index'])->name('gamification.index');
     Route::post('/gamification', [AdminGamificationController::class, 'store'])->name('gamification.store');
+    Route::get('/gamification/{id}/edit', [AdminGamificationController::class, 'edit'])->name('gamification.edit');
     Route::put('/gamification/{id}', [AdminGamificationController::class, 'update'])->name('gamification.update');
     Route::delete('/gamification/{id}', [AdminGamificationController::class, 'destroy'])->name('gamification.destroy');
 });
@@ -94,5 +95,7 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->name('siswa.')->grou
 Route::middleware(['auth', 'role:wali'])->prefix('wali')->name('wali.')->group(function () {
     Route::get('/dashboard', [WaliDashboardController::class, 'index'])->name('dashboard');
     Route::get('/nilai', [WaliDashboardController::class, 'nilai'])->name('nilai');
+    Route::get('/nilai/download-pdf', [WaliDashboardController::class, 'downloadPDF'])->name('nilai.download-pdf');
     Route::get('/progress', [WaliDashboardController::class, 'progress'])->name('progress');
+    Route::get('/feedback', [WaliDashboardController::class, 'feedback'])->name('feedback');
 });

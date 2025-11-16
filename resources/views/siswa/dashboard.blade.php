@@ -53,6 +53,86 @@
     </div>
 </div>
 
+<!-- Score Cards -->
+<div class="grid grid-cols-1 gap-6 mb-6 lg:grid-cols-3">
+    <div class="p-6 rounded-lg shadow border border-gray-200" style="background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);">
+        <div class="flex items-center">
+            <div class="p-3 bg-purple-100 rounded-lg">
+                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                </svg>
+            </div>
+            <div class="ml-4">
+                <p class="text-sm font-medium text-gray-600">Nilai Tertinggi</p>
+                <p class="text-2xl font-bold text-black">{{ $highestScore ?? 0 }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="p-6 rounded-lg shadow border border-gray-200" style="background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);">
+        <div class="flex items-center">
+            <div class="p-3 bg-red-100 rounded-lg">
+                <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path>
+                </svg>
+            </div>
+            <div class="ml-4">
+                <p class="text-sm font-medium text-gray-600">Nilai Terendah</p>
+                <p class="text-2xl font-bold text-black">{{ $lowestScore ?? 0 }}</p>
+            </div>
+        </div>
+    </div>
+
+    @if($latestResult)
+    <div class="p-6 rounded-lg shadow border border-gray-200" style="background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);">
+        <div class="flex items-center">
+            <div class="p-3 bg-indigo-100 rounded-lg">
+                <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <div class="ml-4">
+                <p class="text-sm font-medium text-gray-600">Nilai Terbaru</p>
+                <p class="text-2xl font-bold text-black">{{ $latestResult->nilai }}</p>
+                <p class="text-xs text-gray-500 mt-1">{{ $latestResult->quiz->judul }}</p>
+            </div>
+        </div>
+    </div>
+    @endif
+</div>
+
+<!-- Progress Learning Section -->
+<div class="mb-6 rounded-lg shadow border border-gray-200" style="background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);">
+    <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+        <h2 class="text-xl font-semibold text-black">Progress Belajar</h2>
+        <a href="{{ route('siswa.progress') }}" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm">
+            Lihat Riwayat
+        </a>
+    </div>
+    @if(isset($allResults) && $allResults->count() > 0)
+        <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div class="p-4 bg-blue-50 rounded-lg">
+                    <p class="text-sm text-gray-600">Rata-rata Nilai</p>
+                    <p class="text-2xl font-bold text-black">{{ number_format($averageScore, 1) }}</p>
+                </div>
+                <div class="p-4 bg-green-50 rounded-lg">
+                    <p class="text-sm text-gray-600">Total Quiz</p>
+                    <p class="text-2xl font-bold text-black">{{ $totalQuiz }}</p>
+                </div>
+                <div class="p-4 bg-yellow-50 rounded-lg">
+                    <p class="text-sm text-gray-600">Nilai Tertinggi</p>
+                    <p class="text-2xl font-bold text-black">{{ $highestScore }}</p>
+                </div>
+            </div>
+        </div>
+    @else
+        <div class="p-6 text-center text-gray-500">
+            <p>Belum ada hasil quiz. Mulai kerjakan quiz untuk melihat progress Anda!</p>
+        </div>
+    @endif
+</div>
+
 <!-- Recent Results -->
 <div class="rounded-lg shadow border border-gray-200" style="background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);">
     <div class="p-6 border-b border-gray-200">

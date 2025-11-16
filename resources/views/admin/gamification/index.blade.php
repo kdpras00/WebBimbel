@@ -72,11 +72,11 @@
                         <td class="px-6 py-4 font-bold text-black">{{ $setting->poin }}</td>
                         <td class="px-6 py-4 text-black">{{ $setting->keterangan }}</td>
                         <td class="px-6 py-4">
-                            <button onclick="editSetting({{ $setting->id }})" class="text-blue-600 hover:underline mr-3">Edit</button>
+                            <a href="{{ route('admin.gamification.edit', $setting->id) }}" class="text-blue-600 hover:underline mr-3">Edit</a>
                             <form action="{{ route('admin.gamification.destroy', $setting->id) }}" method="POST" class="inline">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="text-red-600 hover:underline" onclick="return confirm('Yakin ingin menghapus?')">Hapus</button>
+                                <button type="submit" class="text-red-600 hover:underline" onclick="confirmDelete(event, 'Yakin ingin menghapus aturan {{ $setting->nama_aturan }}?')">Hapus</button>
                             </form>
                         </td>
                     </tr>
@@ -90,12 +90,5 @@
     </div>
 </div>
 
-<!-- Edit Modal (simplified - bisa dibuat lebih baik dengan modal) -->
-<script>
-function editSetting(id) {
-    // Implementasi edit bisa menggunakan modal atau redirect ke halaman edit
-    window.location.href = '/admin/gamification/' + id + '/edit';
-}
-</script>
 @endsection
 

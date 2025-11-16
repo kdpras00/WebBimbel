@@ -44,16 +44,26 @@ class MateriController extends Controller
             'konten' => 'nullable|string',
             'mapel_id' => 'required|exists:mapel,id',
             'jurusan' => 'nullable|string|max:50',
+        ], [
+            'file_path.file' => 'File yang diupload tidak valid',
+            'file_path.max' => 'Ukuran file maksimal 10 MB',
+            'file_path.uploaded' => 'File gagal diupload. Pastikan ukuran file tidak melebihi 10 MB dan konfigurasi PHP sudah benar.'
         ]);
 
         // Validasi file sesuai tipe
         if ($validated['tipe'] == 'pdf') {
             $request->validate([
                 'file_path' => 'required|file|mimes:pdf|max:10240',
+            ], [
+                'file_path.mimes' => 'File harus berformat PDF',
+                'file_path.max' => 'Ukuran file PDF maksimal 10 MB'
             ]);
         } elseif ($validated['tipe'] == 'video') {
             $request->validate([
-                'file_path' => 'required|file|mimes:mp4,avi,mov|max:10240',
+                'file_path' => 'required|file|mimes:mp4,avi,mov,quicktime,video/mp4,video/quicktime,video/x-msvideo|max:10240',
+            ], [
+                'file_path.mimes' => 'File harus berformat video (MP4, AVI, atau MOV)',
+                'file_path.max' => 'Ukuran file video maksimal 10 MB'
             ]);
         } elseif ($validated['tipe'] == 'teks') {
             // Untuk teks, file tidak diperlukan
@@ -85,7 +95,18 @@ class MateriController extends Controller
         $validated['pengajar_id'] = Auth::id();
 
         if ($request->hasFile('file_path')) {
-            $validated['file_path'] = $request->file('file_path')->store('materi', 'public');
+            try {
+                $validated['file_path'] = $request->file('file_path')->store('materi', 'public');
+                if (!$validated['file_path']) {
+                    return redirect()->back()
+                        ->withInput()
+                        ->withErrors(['file_path' => 'Gagal mengupload file. Pastikan folder storage memiliki permission yang benar.']);
+                }
+            } catch (\Exception $e) {
+                return redirect()->back()
+                    ->withInput()
+                    ->withErrors(['file_path' => 'Gagal mengupload file: ' . $e->getMessage()]);
+            }
         }
 
         Materi::create($validated);
@@ -120,22 +141,59 @@ class MateriController extends Controller
             'konten' => 'nullable|string',
             'mapel_id' => 'required|exists:mapel,id',
             'jurusan' => 'nullable|string|max:50',
+        ], [
+            'file_path.file' => 'File yang diupload tidak valid',
+            'file_path.max' => 'Ukuran file maksimal 10 MB',
+            'file_path.uploaded' => 'File gagal diupload. Pastikan ukuran file tidak melebihi 10 MB dan konfigurasi PHP sudah benar.'
         ]);
 
         // Validasi file sesuai tipe (hanya jika file diupload)
         if ($request->hasFile('file_path')) {
-            if ($validated['tipe'] == 'pdf') {
-                $request->validate([
-                    'file_path' => 'required|file|mimes:pdf|max:10240',
-                ]);
-            } elseif ($validated['tipe'] == 'video') {
-                $request->validate([
-                    'file_path' => 'required|file|mimes:mp4,avi,mov|max:10240',
-                ]);
-            } elseif ($validated['tipe'] == 'teks') {
+            try {
+                if ($validated['tipe'] == 'pdf') {
+                    $request->validate([
+                        'file_path' => 'required|file|mimes:pdf|max:10240',
+                    ], [
+                        'file_path.required' => 'File PDF wajib diupload',
+                        'file_path.file' => 'File yang diupload tidak valid',
+                        'file_path.mimes' => 'File harus berformat PDF',
+                        'file_path.max' => 'Ukuran file PDF maksimal 10 MB',
+                        'file_path.uploaded' => 'File gagal diupload. Pastikan ukuran file tidak melebihi 10 MB dan format file benar.'
+                    ]);
+                } elseif ($validated['tipe'] == 'video') {
+                    // Validasi dengan extension dan MIME type yang lebih fleksibel
+                    $file = $request->file('file_path');
+                    
+                    if (!$file || !$file->isValid()) {
+                        return redirect()->back()
+                            ->withInput()
+                            ->withErrors(['file_path' => 'File video tidak valid atau gagal diupload. Pastikan file tidak rusak dan ukurannya tidak melebihi 10 MB.']);
+                    }
+                    
+                    $extension = strtolower($file->getClientOriginalExtension());
+                    $allowedExtensions = ['mp4', 'avi', 'mov'];
+                    
+                    if (!in_array($extension, $allowedExtensions)) {
+                        return redirect()->back()
+                            ->withInput()
+                            ->withErrors(['file_path' => 'File harus berformat video (MP4, AVI, atau MOV)']);
+                    }
+                    
+                    $fileSizeKB = $file->getSize() / 1024;
+                    if ($fileSizeKB > 10240) {
+                        return redirect()->back()
+                            ->withInput()
+                            ->withErrors(['file_path' => 'Ukuran file video maksimal 10 MB']);
+                    }
+                } elseif ($validated['tipe'] == 'teks') {
+                    return redirect()->back()
+                        ->withInput()
+                        ->withErrors(['file_path' => 'Tipe teks tidak memerlukan file.']);
+                }
+            } catch (\Illuminate\Validation\ValidationException $e) {
                 return redirect()->back()
                     ->withInput()
-                    ->withErrors(['file_path' => 'Tipe teks tidak memerlukan file.']);
+                    ->withErrors($e->errors());
             }
         } else {
             // Jika tidak ada file baru diupload, pastikan tipe sesuai dengan file yang sudah ada
@@ -179,10 +237,28 @@ class MateriController extends Controller
         }
 
         if ($request->hasFile('file_path')) {
-            if ($materi->file_path) {
-                Storage::disk('public')->delete($materi->file_path);
+            try {
+                // Hapus file lama jika ada
+                if ($materi->file_path) {
+                    try {
+                        Storage::disk('public')->delete($materi->file_path);
+                    } catch (\Exception $e) {
+                        // Ignore error jika file lama tidak ditemukan
+                    }
+                }
+                
+                // Upload file baru
+                $validated['file_path'] = $request->file('file_path')->store('materi', 'public');
+                if (!$validated['file_path']) {
+                    return redirect()->back()
+                        ->withInput()
+                        ->withErrors(['file_path' => 'Gagal mengupload file. Pastikan folder storage memiliki permission yang benar.']);
+                }
+            } catch (\Exception $e) {
+                return redirect()->back()
+                    ->withInput()
+                    ->withErrors(['file_path' => 'Gagal mengupload file: ' . $e->getMessage()]);
             }
-            $validated['file_path'] = $request->file('file_path')->store('materi', 'public');
         }
 
         $materi->update($validated);

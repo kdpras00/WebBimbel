@@ -22,10 +22,14 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
-        $totalQuiz = QuizResult::where('siswa_id', $user->id)->count();
-        $averageScore = QuizResult::where('siswa_id', $user->id)->avg('nilai') ?? 0;
+        $allResults = QuizResult::where('siswa_id', $user->id)->get();
+        $totalQuiz = $allResults->count();
+        $averageScore = $allResults->avg('nilai') ?? 0;
+        $highestScore = $allResults->max('nilai') ?? 0;
+        $lowestScore = $allResults->min('nilai') ?? 0;
+        $latestResult = $allResults->sortByDesc('created_at')->first();
 
-        return view('siswa.dashboard', compact('totalPoin', 'recentResults', 'totalQuiz', 'averageScore'));
+        return view('siswa.dashboard', compact('totalPoin', 'recentResults', 'totalQuiz', 'averageScore', 'highestScore', 'lowestScore', 'latestResult', 'allResults'));
     }
 
     public function progress()

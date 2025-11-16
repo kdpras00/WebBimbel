@@ -7,8 +7,8 @@
     <a href="{{ route('pengajar.results.index') }}" class="text-blue-600 hover:underline mb-4 inline-block">
         ← Kembali ke Daftar Hasil
     </a>
-    <h1 class="text-3xl font-bold text-black">Detail Hasil Quiz</h1>
-    <p class="mt-2 text-gray-600">{{ $result->quiz->judul }} - {{ $result->siswa->name }}</p>
+    <h1 class="text-3xl font-bold text-white">Detail Hasil Quiz</h1>
+    <p class="mt-2 text-gray-100">{{ $result->quiz->judul }} - {{ $result->siswa->name }}</p>
 </div>
 
 <!-- Summary -->
@@ -80,7 +80,7 @@
 
 <!-- Feedback Section -->
 @if($result->feedback->count() > 0)
-    <div class="rounded-lg shadow border border-gray-200 p-6 mb-6" style="background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);">
+    <div class="rounded-lg shadow border border-gray-200 p-6 mb-6 mt-8" style="background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);">
         <h2 class="text-xl font-semibold mb-4 text-black">Feedback</h2>
         @foreach($result->feedback as $feedback)
             <div class="mb-4 p-4 bg-blue-50/20 rounded-lg">

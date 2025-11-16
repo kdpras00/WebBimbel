@@ -31,9 +31,13 @@
                 <select name="quiz_result_id" id="quiz_result_id"
                     class="appearance-none bg-white border border-gray-300 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 transition-all duration-150 !bg-white !text-black !border-gray-300 !dark:bg-white !dark:text-black !dark:border-gray-300">
                     <option value="">Pilih Quiz Result</option>
-                    @if($result)
-                        <option value="{{ $result->id }}" selected>{{ $result->quiz->judul }} - {{ $result->siswa->name }}</option>
-                    @endif
+                    @foreach($results as $r)
+                        <option value="{{ $r->id }}" 
+                                data-siswa="{{ $r->siswa_id }}"
+                                {{ $result && $result->id == $r->id ? 'selected' : '' }}>
+                            {{ $r->quiz->judul }} - {{ $r->siswa->name }} (Nilai: {{ $r->nilai }}) - {{ $r->created_at->format('d M Y') }}
+                        </option>
+                    @endforeach
                 </select>
             </div>
         </div>
@@ -66,13 +70,49 @@ selects.forEach(sel => {
         this.classList.remove('ring-blue-200');
     });
 });
-// Sync quiz_result_id with siswa select as before
+// Sync quiz_result_id with siswa select and filter quiz results
 document.getElementById('siswa_id').addEventListener('change', function() {
-    const selectedOption = this.options[this.selectedIndex];
-    const resultId = selectedOption.getAttribute('data-result');
+    const selectedSiswaId = this.value;
     const quizResultSelect = document.getElementById('quiz_result_id');
-    if (resultId) {
-        quizResultSelect.value = resultId;
+    const allOptions = quizResultSelect.querySelectorAll('option');
+    
+    // Show all options first
+    allOptions.forEach(option => {
+        if (option.value !== '') {
+            option.style.display = '';
+        }
+    });
+    
+    // Filter quiz results based on selected siswa
+    if (selectedSiswaId) {
+        allOptions.forEach(option => {
+            if (option.value !== '') {
+                const optionSiswaId = option.getAttribute('data-siswa');
+                if (optionSiswaId !== selectedSiswaId) {
+                    option.style.display = 'none';
+                }
+            }
+        });
+        
+        // Auto-select first visible quiz result if available
+        const visibleOptions = Array.from(allOptions).filter(opt => 
+            opt.value !== '' && opt.style.display !== 'none'
+        );
+        if (visibleOptions.length > 0) {
+            quizResultSelect.value = visibleOptions[0].value;
+        } else {
+            quizResultSelect.value = '';
+        }
+    } else {
+        quizResultSelect.value = '';
+    }
+});
+
+// Initialize on load
+document.addEventListener('DOMContentLoaded', function() {
+    const siswaSelect = document.getElementById('siswa_id');
+    if (siswaSelect && siswaSelect.value) {
+        siswaSelect.dispatchEvent(new Event('change'));
     }
 });
 </script>

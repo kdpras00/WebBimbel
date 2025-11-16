@@ -30,6 +30,12 @@ class GamificationController extends Controller
             ->with('success', 'Aturan gamifikasi berhasil ditambahkan');
     }
 
+    public function edit($id)
+    {
+        $setting = GamificationSetting::findOrFail($id);
+        return view('admin.gamification.edit', compact('setting'));
+    }
+
     public function update(Request $request, $id)
     {
         $setting = GamificationSetting::findOrFail($id);

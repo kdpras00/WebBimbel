@@ -87,6 +87,7 @@ class QuizController extends Controller
                     'count' => $results->count(),
                     'max_attempt' => $results->max('attempt'),
                     'latest_result' => $results->sortByDesc('created_at')->first(),
+                    'best_score' => $results->max('nilai') ?? 0,
                 ];
             });
 
@@ -137,15 +138,23 @@ class QuizController extends Controller
                     ->delete();
             }
 
-            // Create new session with full time
-            $session = QuizSession::create([
-                'quiz_id' => $quiz->id,
-                'siswa_id' => $user->id,
-                'status' => 'active',
-                'started_at' => now(),
-                'last_resumed_at' => now(),
-                'server_remaining_seconds' => $quiz->durasi ? $quiz->durasi * 60 : null,
-            ]);
+            // Use updateOrCreate to avoid duplicate entry error
+            // This will update existing session or create new one
+            $session = QuizSession::updateOrCreate(
+                [
+                    'quiz_id' => $quiz->id,
+                    'siswa_id' => $user->id,
+                ],
+                [
+                    'status' => 'active',
+                    'started_at' => now(),
+                    'last_resumed_at' => now(),
+                    'server_remaining_seconds' => $quiz->durasi ? $quiz->durasi * 60 : null,
+                    'warning_count' => 0,
+                    'paused_at' => null,
+                    'submitted_at' => null,
+                ]
+            );
         }
 
         if ($session->status !== 'submitted') {

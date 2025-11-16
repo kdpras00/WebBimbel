@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Web Bimbel')</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="bg-blue-400">
     <!-- Navigation -->
@@ -71,6 +72,51 @@
             @yield('content')
         </main>
     </div>
+
+    <script>
+        // Sweet Alert 2 for success messages
+        @if(session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: '{{ session('success') }}',
+                confirmButtonColor: '#2563eb',
+                timer: 3000,
+                timerProgressBar: true
+            });
+        @endif
+
+        // Sweet Alert 2 for error messages
+        @if(session('error'))
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: '{{ session('error') }}',
+                confirmButtonColor: '#dc2626'
+            });
+        @endif
+
+        // Global delete confirmation function
+        function confirmDelete(event, message = 'Yakin ingin menghapus?') {
+            event.preventDefault();
+            const form = event.target.closest('form');
+            
+            Swal.fire({
+                title: 'Apakah Anda yakin?',
+                text: message,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        }
+    </script>
 </body>
 </html>
 

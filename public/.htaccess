@@ -23,3 +23,21 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 </IfModule>
+
+# PHP Configuration for File Upload
+# Catatan: Konfigurasi ini mungkin tidak bekerja jika menggunakan PHP-FPM
+# WAJIB ubah php.ini XAMPP di: /Applications/XAMPP/xamppfiles/etc/php.ini
+<IfModule mod_php8.c>
+    php_value upload_max_filesize 12M
+    php_value post_max_size 12M
+    php_value max_execution_time 300
+    php_value max_input_time 300
+    php_value memory_limit 256M
+</IfModule>
+<IfModule mod_php.c>
+    php_value upload_max_filesize 12M
+    php_value post_max_size 12M
+    php_value max_execution_time 300
+    php_value max_input_time 300
+    php_value memory_limit 256M
+</IfModule>

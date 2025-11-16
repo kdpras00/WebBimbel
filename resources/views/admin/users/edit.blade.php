@@ -51,6 +51,20 @@
             </select>
         </div>
 
+        <div class="mb-4" id="siswaField" style="display: {{ $user->role == 'wali' ? 'block' : 'none' }};">
+            <label class="block mb-2 text-sm font-medium text-black">Siswa (jika wali)</label>
+            <select name="siswa_id"
+                    class="bg-white border border-gray-300 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                <option value="">Pilih Siswa</option>
+                @php
+                    $siswas = \App\Models\User::where('role', 'siswa')->get();
+                @endphp
+                @foreach($siswas as $siswa)
+                    <option value="{{ $siswa->id }}" {{ (isset($siswaWali) && $siswaWali == $siswa->id) || old('siswa_id') == $siswa->id ? 'selected' : '' }}>{{ $siswa->name }}</option>
+                @endforeach
+            </select>
+        </div>
+
         <div class="mb-4" id="kelasField" style="display: {{ $user->role == 'siswa' ? 'block' : 'none' }};">
             <label class="block mb-2 text-sm font-medium text-black">Kelas</label>
             <select name="kelas_id" id="kelasSelect"
@@ -103,18 +117,34 @@
 function toggleSiswaFields() {
     const role = document.querySelector('select[name="role"]').value;
     const waliField = document.getElementById('waliField');
+    const siswaField = document.getElementById('siswaField');
     const kelasField = document.getElementById('kelasField');
     const jurusanField = document.getElementById('jurusanField');
     
     if (role === 'siswa') {
         waliField.style.display = 'block';
         kelasField.style.display = 'block';
-    } else {
+        siswaField.style.display = 'none';
+    } else if (role === 'wali') {
+        siswaField.style.display = 'block';
         waliField.style.display = 'none';
         kelasField.style.display = 'none';
         jurusanField.style.display = 'none';
         // Reset values
-        document.querySelector('select[name="wali_id"]').value = '';
+        document.getElementById('kelasSelect').value = '';
+        document.getElementById('jurusanSelect').value = '';
+    } else {
+        waliField.style.display = 'none';
+        siswaField.style.display = 'none';
+        kelasField.style.display = 'none';
+        jurusanField.style.display = 'none';
+        // Reset values
+        if (document.querySelector('select[name="wali_id"]')) {
+            document.querySelector('select[name="wali_id"]').value = '';
+        }
+        if (document.querySelector('select[name="siswa_id"]')) {
+            document.querySelector('select[name="siswa_id"]').value = '';
+        }
         document.getElementById('kelasSelect').value = '';
         document.getElementById('jurusanSelect').value = '';
     }
@@ -123,13 +153,17 @@ function toggleSiswaFields() {
 // Show/hide jurusan field based on kelas
 function toggleJurusanField() {
     const kelasSelect = document.getElementById('kelasSelect');
+    if (!kelasSelect) return;
+    
     const selectedOption = kelasSelect.options[kelasSelect.selectedIndex];
-    const kelasNama = selectedOption ? selectedOption.getAttribute('data-kelas') : '';
+    const kelasNama = selectedOption && selectedOption.getAttribute('data-kelas') ? selectedOption.getAttribute('data-kelas') : '';
     const jurusanField = document.getElementById('jurusanField');
     const jurusanSelect = document.getElementById('jurusanSelect');
     
+    if (!jurusanField || !jurusanSelect) return;
+    
     // Extract kelas number from nama (e.g., "Kelas 10" -> 10)
-    const kelasMatch = kelasNama.match(/\d+/);
+    const kelasMatch = kelasNama && typeof kelasNama === 'string' ? kelasNama.match(/\d+/) : null;
     const kelasNumber = kelasMatch ? parseInt(kelasMatch[0]) : 0;
     
     // Show jurusan field only for kelas 10, 11, 12
@@ -143,8 +177,15 @@ function toggleJurusanField() {
     }
 }
 
-document.querySelector('select[name="role"]').addEventListener('change', toggleSiswaFields);
-document.getElementById('kelasSelect').addEventListener('change', toggleJurusanField);
+const roleSelect = document.querySelector('select[name="role"]');
+if (roleSelect) {
+    roleSelect.addEventListener('change', toggleSiswaFields);
+}
+
+const kelasSelect = document.getElementById('kelasSelect');
+if (kelasSelect) {
+    kelasSelect.addEventListener('change', toggleJurusanField);
+}
 
 // Trigger on load
 toggleSiswaFields();

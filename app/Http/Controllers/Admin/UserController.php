@@ -33,6 +33,7 @@ class UserController extends Controller
             'password' => 'required|string|min:8',
             'role' => 'required|in:admin,pengajar,siswa,wali',
             'wali_id' => 'nullable|exists:users,id',
+            'siswa_id' => 'nullable|exists:users,id',
             'kelas_id' => 'nullable|exists:kelas,id',
             'jurusan' => 'nullable|string|max:50|in:IPA,IPS',
         ]);
@@ -65,8 +66,8 @@ class UserController extends Controller
             }
         }
 
-        // Hapus kelas_id dan jurusan dari validated karena tidak ada di tabel users
-        unset($validated['kelas_id'], $validated['jurusan']);
+        // Hapus kelas_id, jurusan, dan siswa_id dari validated karena tidak ada di tabel users
+        unset($validated['kelas_id'], $validated['jurusan'], $validated['siswa_id']);
 
         $user = User::create($validated);
 
@@ -83,6 +84,14 @@ class UserController extends Controller
                     'updated_at' => now(),
                 ]
             );
+        }
+
+        // Handle siswa_id untuk wali
+        if ($validated['role'] == 'wali' && $request->filled('siswa_id')) {
+            $siswa = User::findOrFail($request->input('siswa_id'));
+            if ($siswa->role == 'siswa') {
+                $siswa->update(['wali_id' => $user->id]);
+            }
         }
 
         return redirect()->route('admin.users.index')
@@ -109,7 +118,16 @@ class UserController extends Controller
             }
         }
         
-        return view('admin.users.edit', compact('user', 'walis', 'kelas', 'jurusanOptions', 'kelasSiswa', 'jurusanSiswa'));
+        // Get siswa yang sudah dipilih oleh wali ini
+        $siswaWali = null;
+        if ($user->role == 'wali') {
+            $anak = User::where('wali_id', $user->id)->where('role', 'siswa')->first();
+            if ($anak) {
+                $siswaWali = $anak->id;
+            }
+        }
+        
+        return view('admin.users.edit', compact('user', 'walis', 'kelas', 'jurusanOptions', 'kelasSiswa', 'jurusanSiswa', 'siswaWali'));
     }
 
     public function update(Request $request, $id)
@@ -122,6 +140,7 @@ class UserController extends Controller
             'password' => 'nullable|string|min:8',
             'role' => 'required|in:admin,pengajar,siswa,wali',
             'wali_id' => 'nullable|exists:users,id',
+            'siswa_id' => 'nullable|exists:users,id',
             'kelas_id' => 'nullable|exists:kelas,id',
             'jurusan' => 'nullable|string|max:50|in:IPA,IPS',
         ]);
@@ -175,8 +194,22 @@ class UserController extends Controller
             DB::table('kelas_siswa')->where('siswa_id', $user->id)->delete();
         }
 
-        // Hapus kelas_id dan jurusan dari validated karena tidak ada di tabel users
-        unset($validated['kelas_id'], $validated['jurusan']);
+        // Handle siswa_id untuk wali
+        if ($validated['role'] == 'wali') {
+            // Hapus wali_id dari siswa yang sebelumnya terhubung dengan wali ini
+            User::where('wali_id', $user->id)->where('role', 'siswa')->update(['wali_id' => null]);
+            
+            // Set wali_id pada siswa yang baru dipilih
+            if (!empty($validated['siswa_id'])) {
+                $siswa = User::findOrFail($validated['siswa_id']);
+                if ($siswa->role == 'siswa') {
+                    $siswa->update(['wali_id' => $user->id]);
+                }
+            }
+        }
+
+        // Hapus kelas_id, jurusan, dan siswa_id dari validated karena tidak ada di tabel users
+        unset($validated['kelas_id'], $validated['jurusan'], $validated['siswa_id']);
 
         $user->update($validated);
 

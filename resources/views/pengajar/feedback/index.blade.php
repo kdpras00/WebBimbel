@@ -17,6 +17,7 @@
                 <tr>
                     <th scope="col" class="px-6 py-3">Siswa</th>
                     <th scope="col" class="px-6 py-3">Quiz</th>
+                    <th scope="col" class="px-6 py-3">Hasil Pengerjaan</th>
                     <th scope="col" class="px-6 py-3">Komentar</th>
                     <th scope="col" class="px-6 py-3">Tanggal</th>
                     <th scope="col" class="px-6 py-3">Aksi</th>
@@ -33,20 +34,34 @@
                                 -
                             @endif
                         </td>
+                        <td class="px-6 py-4">
+                            @if($f->quizResult)
+                                <div class="flex flex-col">
+                                    <span class="text-sm font-medium text-black">Nilai: {{ $f->quizResult->nilai }}</span>
+                                    <span class="text-xs text-gray-600">{{ $f->quizResult->jawaban_benar }}/{{ $f->quizResult->total_soal }} benar</span>
+                                    <span class="text-xs text-gray-500">{{ $f->quizResult->created_at->format('d M Y H:i') }}</span>
+                                </div>
+                            @else
+                                <span class="text-gray-400">-</span>
+                            @endif
+                        </td>
                         <td class="px-6 py-4 text-black">{{ Str::limit($f->komentar, 50) }}</td>
                         <td class="px-6 py-4 text-black">{{ $f->created_at->format('d M Y') }}</td>
                         <td class="px-6 py-4">
                             <a href="{{ route('pengajar.feedback.edit', $f->id) }}" class="text-blue-600 hover:underline mr-3">Edit</a>
+                            @if($f->quizResult)
+                                <a href="{{ route('pengajar.results.show', $f->quizResult->id) }}" class="text-green-600 hover:underline mr-3">Lihat Hasil</a>
+                            @endif
                             <form action="{{ route('pengajar.feedback.destroy', $f->id) }}" method="POST" class="inline">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="text-red-600 hover:underline" onclick="return confirm('Yakin ingin menghapus?')">Hapus</button>
+                                <button type="submit" class="text-red-600 hover:underline" onclick="confirmDelete(event, 'Yakin ingin menghapus feedback ini?')">Hapus</button>
                             </form>
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="px-6 py-4 text-center text-gray-500">Belum ada feedback</td>
+                        <td colspan="6" class="px-6 py-4 text-center text-gray-500">Belum ada feedback</td>
                     </tr>
                 @endforelse
             </tbody>

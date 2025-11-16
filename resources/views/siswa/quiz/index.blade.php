@@ -43,6 +43,9 @@
             $isCompleted = $attemptCount > 0;
             $canRetry = $attemptCount < 3;
             $latestResult = $quizResult['latest_result'] ?? null;
+            // Cek nilai tertinggi untuk quiz ini
+            $bestScore = $quizResult['best_score'] ?? 0;
+            $hasPerfectScore = $bestScore == 100;
         @endphp
         <div class="rounded-lg shadow border border-gray-200" style="background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);">
             <div class="p-6">
@@ -94,26 +97,52 @@
                 @endif
                 
                 @if($quiz->is_published)
-                    @if($isCompleted && $canRetry)
-                        <a href="{{ route('siswa.quiz.show', $quiz->id) }}" 
-                           class="inline-flex items-center px-4 py-2 text-sm font-medium text-center text-white bg-orange-600 rounded-lg hover:bg-orange-700 focus:ring-4 focus:outline-none focus:ring-orange-300">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                            </svg>
-                            Ulangi Quiz
-                        </a>
-                    @elseif($isCompleted && !$canRetry)
-                        <div class="space-y-2">
-                            <a href="{{ route('siswa.quiz.result', $latestResult->id) }}" 
-                               class="inline-flex items-center px-4 py-2 text-sm font-medium text-center text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                </svg>
-                                Lihat Hasil
-                            </a>
-                            <p class="text-xs text-gray-500">Anda sudah mencapai batas maksimal 3 kali attempt</p>
-                        </div>
+                    @if($isCompleted)
+                        @if($hasPerfectScore)
+                            {{-- Jika nilai tertinggi = 100, hanya tampilkan tombol Lihat Quiz --}}
+                            <div class="space-y-2">
+                                <a href="{{ route('siswa.quiz.result', $latestResult->id) }}" 
+                                   class="inline-flex items-center px-4 py-2 text-sm font-medium text-center text-white bg-green-600 rounded-lg hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                    </svg>
+                                    Lihat Quiz
+                                </a>
+                            </div>
+                        @elseif($canRetry)
+                            {{-- Jika belum sempurna dan masih bisa retry --}}
+                            <div class="space-y-2">
+                                <a href="{{ route('siswa.quiz.show', $quiz->id) }}" 
+                                   class="inline-flex items-center px-4 py-2 text-sm font-medium text-center text-white bg-orange-600 rounded-lg hover:bg-orange-700 focus:ring-4 focus:outline-none focus:ring-orange-300">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                    </svg>
+                                    Ulangi Quiz
+                                </a>
+                                <a href="{{ route('siswa.quiz.result', $latestResult->id) }}" 
+                                   class="inline-flex items-center px-4 py-2 text-sm font-medium text-center text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                    </svg>
+                                    Lihat Quiz
+                                </a>
+                            </div>
+                        @else
+                            {{-- Sudah mencapai batas maksimal attempt --}}
+                            <div class="space-y-2">
+                                <a href="{{ route('siswa.quiz.result', $latestResult->id) }}" 
+                                   class="inline-flex items-center px-4 py-2 text-sm font-medium text-center text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                    </svg>
+                                    Lihat Quiz
+                                </a>
+                                <p class="text-xs text-gray-500">Anda sudah mencapai batas maksimal 3 kali attempt</p>
+                            </div>
+                        @endif
                     @else
                         <a href="{{ route('siswa.quiz.show', $quiz->id) }}" 
                            class="inline-flex items-center px-4 py-2 text-sm font-medium text-center text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300">

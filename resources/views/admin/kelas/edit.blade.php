@@ -155,7 +155,7 @@
                                             @csrf
                                             <input type="hidden" name="mapel_id" value="{{ $mapel->id }}">
                                             <input type="hidden" name="pengajar_id" value="{{ $p->id }}">
-                                            <button type="submit" class="text-red-600 hover:underline text-sm" onclick="return confirm('Yakin ingin menghapus pengajar ini?')">
+                                            <button type="submit" class="text-red-600 hover:underline text-sm" onclick="confirmDelete(event, 'Yakin ingin menghapus pengajar ini?')">
                                                 Hapus
                                             </button>
                                         </form>
@@ -197,7 +197,7 @@
                         <form action="{{ route('admin.kelas.unassign-siswa', $kelas->id) }}" method="POST" class="inline">
                             @csrf
                             <input type="hidden" name="siswa_id" value="{{ $s->id }}">
-                            <button type="submit" class="text-red-600 hover:underline text-sm" onclick="return confirm('Yakin ingin menghapus siswa ini?')">
+                            <button type="submit" class="text-red-600 hover:underline text-sm" onclick="confirmDelete(event, 'Yakin ingin menghapus siswa ini?')">
                                 Hapus
                             </button>
                         </form>

@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="mb-6">
-    <h1 class="text-3xl font-bold text-black">Edit Feedback</h1>
+    <h1 class="text-3xl font-bold text-white">Edit Feedback</h1>
 </div>
 
 <div class="rounded-lg shadow border border-gray-200 p-6" style="background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);">
