@@ -45,7 +45,7 @@
     @php
     $progress = $progressData[$child->id] ?? ['avg_score' => 0, 'total_quiz' => 0, 'best_score' => 0];
     @endphp
-    <div class="group relative overflow-hidden rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 bg-white border border-gray-200">
+    <div class="group relative overflow-hidden rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 bg-white border border-gray-200 child-progress-card" data-child="{{ $child->id }}">
         <div class="p-6">
             <div class="flex items-center justify-between mb-6">
                 <h3 class="text-2xl font-bold text-black">{{ $child->name }}</h3>
@@ -130,7 +130,7 @@
                         <span class="text-gray-400">/</span>
                         <span class="text-gray-600">{{ $result->total_soal }}</span>
                     </td>
-                    <td class="px-6 py-4 text-gray-600">{{ $result->created_at->format('d M Y H:i') }}</td>
+                    <td class="px-6 py-4 text-gray-600">{{ $result->created_at->setTimezone('Asia/Jakarta')->format('d M Y, H:i') }} WIB</td>
                     <td class="px-6 py-4">
                         @php
                         $quiz = $result->quiz;
@@ -143,7 +143,7 @@
                         return [
                         'pengajar' => $f->pengajar->name ?? 'Pengajar',
                         'komentar' => $f->komentar,
-                        'tanggal' => $f->created_at->format('d M Y H:i')
+                        'tanggal' => $f->created_at->setTimezone('Asia/Jakarta')->format('d M Y, H:i') . ' WIB'
                         ];
                         })->values();
                         @endphp
@@ -193,12 +193,23 @@
     document.getElementById('filterChild').addEventListener('change', function() {
         const selectedChild = this.value;
         const rows = document.querySelectorAll('tbody tr[data-child]');
+        const progressCards = document.querySelectorAll('.child-progress-card');
 
+        // Filter table rows
         rows.forEach(row => {
             if (selectedChild === 'all' || row.getAttribute('data-child') === selectedChild) {
                 row.style.display = '';
             } else {
                 row.style.display = 'none';
+            }
+        });
+
+        // Filter progress cards
+        progressCards.forEach(card => {
+            if (selectedChild === 'all' || card.getAttribute('data-child') === selectedChild) {
+                card.style.display = '';
+            } else {
+                card.style.display = 'none';
             }
         });
     });

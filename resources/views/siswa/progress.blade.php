@@ -67,7 +67,9 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-black align-middle">{{ $result->jawaban_benar }}/{{ $result->total_soal }}</td>
-                            <td class="px-6 py-4 text-black align-middle whitespace-nowrap">{{ $result->created_at->format('d M Y H:i') }}</td>
+                            <td class="px-6 py-4 text-black align-middle whitespace-nowrap">
+                                <div class="text-sm">{{ $result->created_at->setTimezone('Asia/Jakarta')->format('d M Y, H:i') }} WIB</div>
+                            </td>
                             <td class="px-6 py-4 align-middle">
                                 <a href="{{ route('siswa.quiz.result', $result->id) }}" 
                                    class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-2 focus:outline-none focus:ring-blue-300">

@@ -328,16 +328,29 @@ class QuizController extends Controller
             }
         }
 
+        // Calculate total possible score (use skor if available, otherwise default to 1 per question)
+        $totalMaxSkor = 0;
+        foreach ($quiz->questions as $question) {
+            $totalMaxSkor += $question->skor ?? 1;
+        }
+        
         foreach ($quiz->questions as $question) {
             $userAnswer = $convertedJawaban[$question->id] ?? null;
             
             if ($userAnswer && $userAnswer == $question->jawaban_benar) {
                 $jawabanBenar++;
-                $totalSkor += $question->skor;
+                $totalSkor += $question->skor ?? 1;
             }
         }
 
-        $nilai = ($totalSkor / ($totalSkor > 0 ? $totalSkor : 1)) * 100;
+        // Calculate nilai based on total possible score
+        // If no skor system, calculate based on number of correct answers
+        if ($totalMaxSkor > 0) {
+            $nilai = ($totalSkor / $totalMaxSkor) * 100;
+        } else {
+            // Fallback: calculate based on correct answers count
+            $nilai = $totalSoal > 0 ? ($jawabanBenar / $totalSoal) * 100 : 0;
+        }
 
         // Calculate attempt number
         $previousAttempts = QuizResult::where('quiz_id', $quiz->id)

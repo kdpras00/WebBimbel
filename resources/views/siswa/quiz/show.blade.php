@@ -210,22 +210,7 @@
                         <li>Tenang dan percaya diri</li>
                     </ul>
                 </div>
-            </div>
-
-            <!-- Doa -->
-            <div class="bg-blue-100 backdrop-blur-sm border-l-4 border-blue-400 p-3 rounded-r-lg mb-5 shadow-sm">
-                <h3 class="font-semibold text-blue-900 mb-2 flex items-center gap-2 text-sm">
-                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5 8.85V13a2 2 0 002 2h6a2 2 0 002-2V8.85l2.394-1.93a1 1 0 000-1.84l-7-3z"></path>
-                    </svg>
-                    Doa Sebelum Belajar
-                </h3>
-                <div class="text-xs text-blue-800 space-y-1.5 text-right bg-white p-3 rounded-lg">
-                    <p class="font-bold text-sm text-blue-900">رَبِّ زِدْنِي عِلْمًا</p>
-                    <p class="italic">"Robbi zidni 'ilman"</p>
-                    <p class="text-blue-700">"Ya Allah, tambahkanlah kepadaku ilmu pengetahuan"</p>
-                </div>
-            </div>
+            </div>            
 
             <!-- Button -->
             <div class="flex justify-center">

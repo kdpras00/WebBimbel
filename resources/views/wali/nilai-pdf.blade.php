@@ -9,74 +9,89 @@
             padding: 0;
             box-sizing: border-box;
         }
+        @page {
+            margin: 1.5cm;
+            size: A4 portrait;
+        }
         body {
             font-family: Arial, sans-serif;
-            font-size: 12px;
+            font-size: 11px;
             color: #333;
-            line-height: 1.6;
+            line-height: 1.5;
+            margin: 0;
+            padding: 0;
         }
         .header {
-            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            background: #2563eb;
             color: white;
             padding: 20px;
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
+            page-break-after: avoid;
         }
         .header h1 {
-            font-size: 24px;
+            font-size: 22px;
             margin-bottom: 5px;
+            font-weight: bold;
         }
         .header p {
-            font-size: 14px;
-            opacity: 0.9;
+            font-size: 12px;
+            opacity: 0.95;
         }
         .info-section {
-            margin-bottom: 25px;
-            padding: 15px;
+            margin-bottom: 20px;
+            padding: 12px;
             background: #f8f9fa;
             border-left: 4px solid #2563eb;
         }
         .info-section p {
-            margin: 5px 0;
+            margin: 3px 0;
+            font-size: 11px;
         }
         .child-section {
-            margin-bottom: 30px;
+            margin-bottom: 35px;
             page-break-inside: avoid;
         }
         .child-header {
             background: #e3f2fd;
-            padding: 15px;
+            padding: 12px;
             border-left: 4px solid #2196f3;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
+            page-break-after: avoid;
         }
         .child-header h2 {
-            font-size: 18px;
+            font-size: 16px;
             color: #1976d2;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
+            font-weight: bold;
         }
         .stats-grid {
             display: table;
             width: 100%;
-            margin-bottom: 15px;
+            margin-bottom: 0;
+            border-collapse: separate;
+            border-spacing: 0;
         }
         .stat-box {
             display: table-cell;
             width: 33.33%;
-            padding: 10px;
+            padding: 8px;
             text-align: center;
             background: white;
             border: 1px solid #ddd;
+            vertical-align: middle;
         }
         .stat-box:not(:last-child) {
             border-right: none;
         }
         .stat-label {
-            font-size: 10px;
+            font-size: 9px;
             color: #666;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
+            font-weight: normal;
         }
         .stat-value {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: bold;
             color: #333;
         }
@@ -85,19 +100,31 @@
             border-collapse: collapse;
             margin-bottom: 20px;
             background: white;
+            page-break-inside: auto;
         }
         thead {
             background: #2563eb;
             color: white;
+            display: table-header-group;
+        }
+        tbody {
+            display: table-row-group;
+        }
+        tr {
+            page-break-inside: avoid;
+            page-break-after: auto;
         }
         th, td {
-            padding: 10px;
+            padding: 8px 6px;
             text-align: left;
             border: 1px solid #ddd;
+            word-wrap: break-word;
+            vertical-align: top;
         }
         th {
             font-weight: bold;
-            font-size: 11px;
+            font-size: 10px;
+            text-align: center;
         }
         td {
             font-size: 10px;
@@ -106,10 +133,13 @@
             background: #f9fafb;
         }
         .badge {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 10px;
+            padding: 3px 6px;
+            border-radius: 3px;
+            font-size: 9px;
             font-weight: bold;
+            display: inline-block;
+            text-align: center;
+            min-width: 35px;
         }
         .badge-green {
             background: #d1fae5;
@@ -124,18 +154,45 @@
             color: #991b1b;
         }
         .footer {
-            margin-top: 30px;
-            padding-top: 15px;
+            margin-top: 25px;
+            padding-top: 12px;
             border-top: 2px solid #ddd;
             text-align: center;
-            font-size: 10px;
+            font-size: 9px;
             color: #666;
+            page-break-inside: avoid;
         }
         .no-data {
             text-align: center;
-            padding: 30px;
+            padding: 25px;
             color: #999;
             font-style: italic;
+            font-size: 11px;
+        }
+        /* Prevent table overflow */
+        table {
+            table-layout: fixed;
+        }
+        th:nth-child(1), td:nth-child(1) {
+            width: 5%;
+            text-align: center;
+        }
+        th:nth-child(2), td:nth-child(2) {
+            width: 30%;
+        }
+        th:nth-child(3), td:nth-child(3) {
+            width: 18%;
+        }
+        th:nth-child(4), td:nth-child(4) {
+            width: 10%;
+            text-align: center;
+        }
+        th:nth-child(5), td:nth-child(5) {
+            width: 15%;
+            text-align: center;
+        }
+        th:nth-child(6), td:nth-child(6) {
+            width: 22%;
         }
     </style>
 </head>
@@ -143,13 +200,6 @@
     <div class="header">
         <h1>Laporan Nilai Belajar Anak</h1>
         <p>Dicetak pada: {{ date('d F Y H:i:s') }}</p>
-    </div>
-
-    <div class="info-section">
-        <p><strong>Nama Wali Murid:</strong> {{ $user->name }}</p>
-        <p><strong>Email:</strong> {{ $user->email }}</p>
-        <p><strong>Total Anak:</strong> {{ $anak->count() }}</p>
-        <p><strong>Total Hasil Quiz:</strong> {{ $results->count() }}</p>
     </div>
 
     @if($anak->count() > 0)
@@ -206,7 +256,7 @@
                                         </span>
                                     </td>
                                     <td>{{ $result->jawaban_benar }}/{{ $result->total_soal }}</td>
-                                    <td>{{ $result->created_at->format('d M Y H:i') }}</td>
+                                    <td>{{ $result->created_at->setTimezone('Asia/Jakarta')->format('d M Y, H:i') }} WIB</td>
                                 </tr>
                             @endforeach
                         </tbody>

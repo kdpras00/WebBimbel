@@ -61,7 +61,7 @@
         <svg class="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
         </svg>
-        <span class="text-sm font-medium">Tanggal Pengerjaan: {{ $result->created_at->format('d F Y') }} pukul {{ $result->created_at->format('H:i') }} WIB</span>
+        <span class="text-sm font-medium">Tanggal Pengerjaan: {{ $result->created_at->setTimezone('Asia/Jakarta')->format('d F Y') }} pukul {{ $result->created_at->setTimezone('Asia/Jakarta')->format('H:i') }} WIB</span>
     </div>
 </div>
 
