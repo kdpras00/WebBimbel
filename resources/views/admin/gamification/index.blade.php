@@ -6,7 +6,7 @@
 <div class="mb-6 flex justify-between items-center">
     <h1 class="text-3xl font-bold text-white">Kelola Gamifikasi</h1>
     <button type="button" onclick="document.getElementById('addForm').classList.toggle('hidden')" 
-            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+            class="px-4 py-2 bg-white text-blue-600 rounded-lg hover:bg-blue-50 font-medium transition-colors">
         Tambah Aturan
     </button>
 </div>
@@ -43,8 +43,9 @@
                           class="bg-white border border-gray-300 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"></textarea>
             </div>
         </div>
-        <div class="mt-4">
+        <div class="mt-4 flex gap-2">
             <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Simpan</button>
+            <button type="button" onclick="document.getElementById('addForm').classList.add('hidden')" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">Batal</button>
         </div>
     </form>
 </div>

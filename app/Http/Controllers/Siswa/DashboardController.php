@@ -28,8 +28,11 @@ class DashboardController extends Controller
         $highestScore = $allResults->max('nilai') ?? 0;
         $lowestScore = $allResults->min('nilai') ?? 0;
         $latestResult = $allResults->sortByDesc('created_at')->first();
+        
+        // Limit to only 1 latest active information to prevent UI clutter
+        $informasi = \App\Models\Informasi::where('is_active', true)->latest()->take(1)->get();
 
-        return view('siswa.dashboard', compact('totalPoin', 'recentResults', 'totalQuiz', 'averageScore', 'highestScore', 'lowestScore', 'latestResult', 'allResults'));
+        return view('siswa.dashboard', compact('totalPoin', 'recentResults', 'totalQuiz', 'averageScore', 'highestScore', 'lowestScore', 'latestResult', 'allResults', 'informasi'));
     }
 
     public function progress()

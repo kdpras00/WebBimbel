@@ -7,6 +7,8 @@ use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\KelasController as AdminKelasController;
 use App\Http\Controllers\Admin\MapelController as AdminMapelController;
 use App\Http\Controllers\Admin\GamificationController as AdminGamificationController;
+use App\Http\Controllers\Admin\InformasiController as AdminInformasiController;
+use App\Http\Controllers\Owner\DashboardController as OwnerDashboardController;
 use App\Http\Controllers\Pengajar\DashboardController as PengajarDashboardController;
 use App\Http\Controllers\Pengajar\MateriController as PengajarMateriController;
 use App\Http\Controllers\Pengajar\QuizController as PengajarQuizController;
@@ -15,9 +17,20 @@ use App\Http\Controllers\Pengajar\FeedbackController as PengajarFeedbackControll
 use App\Http\Controllers\Siswa\DashboardController as SiswaDashboardController;
 use App\Http\Controllers\Siswa\MateriController as SiswaMateriController;
 use App\Http\Controllers\Siswa\QuizController as SiswaQuizController;
-use App\Http\Controllers\Siswa\LeaderboardController as SiswaLeaderboardController;
 use App\Http\Controllers\Siswa\QuizSessionController as SiswaQuizSessionController;
+use App\Http\Controllers\Siswa\LeaderboardController as SiswaLeaderboardController;
 use App\Http\Controllers\Wali\DashboardController as WaliDashboardController;
+
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register web routes for your application. These
+| routes are loaded by the RouteServiceProvider and all of them will
+| be assigned to the "web" middleware group. Make something great!
+|
+*/
 
 // Home
 Route::get('/', function () {
@@ -37,6 +50,7 @@ Route::get('/dashboard', function () {
         'pengajar' => redirect()->route('pengajar.dashboard'),
         'siswa' => redirect()->route('siswa.dashboard'),
         'wali' => redirect()->route('wali.dashboard'),
+        'pemilik' => redirect()->route('owner.dashboard'),
         default => redirect()->route('login'),
     };
 })->middleware('auth')->name('dashboard');
@@ -56,6 +70,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/gamification/{id}/edit', [AdminGamificationController::class, 'edit'])->name('gamification.edit');
     Route::put('/gamification/{id}', [AdminGamificationController::class, 'update'])->name('gamification.update');
     Route::delete('/gamification/{id}', [AdminGamificationController::class, 'destroy'])->name('gamification.destroy');
+    Route::resource('informasi', AdminInformasiController::class);
 });
 
 // Pengajar Routes
@@ -82,6 +97,8 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->name('siswa.')->grou
     Route::get('/materi/{id}', [SiswaMateriController::class, 'show'])->name('materi.show');
     Route::get('/quiz', [SiswaQuizController::class, 'index'])->name('quiz.index');
     Route::get('/quiz/{id}', [SiswaQuizController::class, 'show'])->name('quiz.show');
+    Route::post('/quiz/{id}/start', [SiswaQuizController::class, 'start'])->name('quiz.start');
+    Route::get('/quiz/{id}/attempt', [SiswaQuizController::class, 'attempt'])->name('quiz.attempt');
     Route::post('/quiz/{id}/submit', [SiswaQuizController::class, 'submit'])->name('quiz.submit');
     Route::get('/quiz/result/{id}', [SiswaQuizController::class, 'result'])->name('quiz.result');
     Route::post('/quiz/{quiz}/session/pause', [SiswaQuizSessionController::class, 'pause'])->name('quiz.session.pause');
@@ -91,11 +108,15 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->name('siswa.')->grou
     Route::get('/progress', [SiswaDashboardController::class, 'progress'])->name('progress');
 });
 
+// Owner Routes
+Route::middleware(['auth', 'role:pemilik'])->prefix('owner')->name('owner.')->group(function () {
+    Route::get('/dashboard', [OwnerDashboardController::class, 'index'])->name('dashboard');
+});
+
 // Wali Routes
 Route::middleware(['auth', 'role:wali'])->prefix('wali')->name('wali.')->group(function () {
     Route::get('/dashboard', [WaliDashboardController::class, 'index'])->name('dashboard');
     Route::get('/nilai', [WaliDashboardController::class, 'nilai'])->name('nilai');
     Route::get('/nilai/download-pdf', [WaliDashboardController::class, 'downloadPDF'])->name('nilai.download-pdf');
     Route::get('/progress', [WaliDashboardController::class, 'progress'])->name('progress');
-    Route::get('/feedback', [WaliDashboardController::class, 'feedback'])->name('feedback');
 });

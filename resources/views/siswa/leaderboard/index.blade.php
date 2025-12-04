@@ -33,7 +33,7 @@
         <table class="w-full text-sm text-left text-black">
             <thead class="text-xs text-gray-700 uppercase bg-gray-100">
                 <tr>
-                    <th scope="col" class="px-6 py-3">Peringkat</th>
+                    <th scope="col" class="px-6 py-3 text-center">Peringkat</th>
                     <th scope="col" class="px-6 py-3">Nama</th>
                     <th scope="col" class="px-6 py-3">Total Poin</th>
                 </tr>
@@ -42,17 +42,21 @@
                 @forelse($leaderboard as $index => $point)
                     <tr class="bg-white border-b border-gray-200 
                         @if($point->user_id == Auth::id()) bg-blue-50 @endif">
-                        <td class="px-6 py-4">
-                            @if($index < 3)
-                                <span class="text-2xl">
-                                    @if($index == 0) 🥇
-                                    @elseif($index == 1) 🥈
-                                    @else 🥉
-                                    @endif
-                                </span>
-                            @else
-                                <span class="font-bold text-black">#{{ $index + 1 }}</span>
-                            @endif
+                        <td class="px-6 py-4 text-center">
+                            @php
+                                $badge = $point->badge;
+                                $emoji = match($badge) {
+                                    'Diamond' => '💎',
+                                    'Gold' => '🥇',
+                                    'Silver' => '🥈',
+                                    'Bronze' => '🥉',
+                                    default => '🥉'
+                                };
+                            @endphp
+                            <div class="flex flex-col items-center justify-center">
+                                <span class="text-3xl" title="{{ $badge }}">{{ $emoji }}</span>
+                                <span class="text-xs font-bold text-gray-500 mt-1">#{{ $index + 1 }}</span>
+                            </div>
                         </td>
                         <td class="px-6 py-4 font-medium text-black">
                             {{ $point->user->name }}

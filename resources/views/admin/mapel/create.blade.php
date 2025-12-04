@@ -12,8 +12,47 @@
         @csrf
         <div class="mb-4">
             <label class="block mb-2 text-sm font-medium text-black text-black">Nama</label>
-            <input type="text" name="nama" value="{{ old('nama') }}" required
-                   class="bg-white border border-gray-300 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 text-black">
+            <select id="namaSelect" class="bg-white border border-gray-300 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 text-black mb-2">
+                <option value="">Pilih Mata Pelajaran</option>
+                @php
+                    $commonSubjects = ['Matematika', 'Bahasa Indonesia', 'Bahasa Inggris', 'IPA', 'IPS', 'PKN', 'Agama', 'Penjaskes', 'Seni Budaya'];
+                    $oldNama = old('nama');
+                    $isOther = $oldNama && !in_array($oldNama, $commonSubjects);
+                @endphp
+                @foreach($commonSubjects as $subject)
+                    <option value="{{ $subject }}" {{ $oldNama == $subject ? 'selected' : '' }}>{{ $subject }}</option>
+                @endforeach
+                <option value="Lainnya" {{ $isOther ? 'selected' : '' }}>Lainnya</option>
+            </select>
+            
+            <input type="text" id="namaInput" name="nama" value="{{ old('nama') }}" 
+                   class="bg-white border border-gray-300 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 text-black {{ $isOther ? '' : 'hidden' }}"
+                   placeholder="Masukkan nama mata pelajaran lainnya" {{ $isOther ? 'required' : '' }}>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const select = document.getElementById('namaSelect');
+                    const input = document.getElementById('namaInput');
+
+                    select.addEventListener('change', function() {
+                        if (this.value === 'Lainnya') {
+                            input.classList.remove('hidden');
+                            input.value = '';
+                            input.required = true;
+                            input.focus();
+                        } else {
+                            input.classList.add('hidden');
+                            input.value = this.value;
+                            input.required = true;
+                        }
+                    });
+
+                    // Initial check
+                    if (select.value !== 'Lainnya' && select.value !== '') {
+                        input.value = select.value;
+                    }
+                });
+            </script>
         </div>
 
         <div class="mb-4">

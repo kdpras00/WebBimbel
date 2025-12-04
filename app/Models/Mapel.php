@@ -15,6 +15,7 @@ class Mapel extends Model
         'nama',
         'deskripsi',
         'kelas_id',
+        'kkm',
     ];
 
     public function kelas(): BelongsTo

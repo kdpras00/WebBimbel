@@ -42,31 +42,31 @@
 <div class="mb-6">
     <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
         <div class="flex items-center gap-4">
-            <span class="text-sm font-medium text-gray-700300">Progress</span>
-            <span class="text-sm font-medium text-gray-700300" id="progressText">0/{{ $quiz->questions->count() }}</span>
+            <span class="text-sm font-medium text-white">Progress</span>
+            <span class="text-sm font-medium text-white" id="progressText">0/{{ $quiz->questions->count() }}</span>
         </div>
         <div class="flex items-center gap-3">
             @if($quiz->durasi)
-                <div id="timerContainer" class="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg border-2 border-indigo-300 transition-colors">
-                    <svg class="w-5 h-5 text-indigo-600400" fill="currentColor" viewBox="0 0 20 20">
+                <div id="timerContainer" class="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-sm transition-colors">
+                    <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
                     </svg>
-                    <span class="text-lg font-bold text-indigo-700300" id="timer">00:00</span>
+                    <span class="text-lg font-bold text-blue-700" id="timer">00:00</span>
                 </div>
             @endif
-            <div id="warningBadge" class="flex items-center gap-2 px-4 py-2 bg-yellow-100/30 rounded-lg border-2 border-yellow-300 transition-colors">
-                <svg class="w-5 h-5 text-yellow-600400" fill="currentColor" viewBox="0 0 20 20">
+            <div id="warningBadge" class="flex items-center gap-2 px-4 py-2 bg-yellow-100 rounded-lg border-2 border-yellow-300 transition-colors shadow-sm">
+                <svg class="w-5 h-5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.721-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.492-1.646-1.742-2.98l5.58-9.92zM11 13a1 1 0 10-2 0 1 1 0 002 0zm-1-2a1 1 0 01-1-1V7a1 1 0 112 0v3a1 1 0 01-1 1z" clip-rule="evenodd"></path>
                 </svg>
-                <span class="text-sm font-semibold text-yellow-800200">
+                <span class="text-sm font-semibold text-yellow-800">
                     Peringatan:
                     <span id="warningCount">{{ $session->warning_count }}</span>/{{ $maxWarnings }}
                 </span>
             </div>
         </div>
     </div>
-    <div class="w-full bg-gray-100 rounded-full h-2.5">
-        <div class="bg-blue-400 h-2.5 rounded-full transition-all duration-300" id="progressBar" style="width: 0%"></div>
+    <div class="w-full bg-blue-600/30 rounded-full h-3 backdrop-blur-sm">
+        <div class="bg-yellow-400 h-3 rounded-full transition-all duration-500 shadow-[0_0_10px_rgba(250,204,21,0.5)]" id="progressBar" style="width: 0%"></div>
     </div>
 </div>
 
@@ -159,70 +159,117 @@
     </form>
 </div>
 
-<!-- Modal Petunjuk & Doa (SweetAlert2 Style) -->
-<div id="instructionModal" class="fixed inset-0 flex items-center justify-center z-50 hidden" style="backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);">
-    <div class="absolute inset-0 bg-black/30"></div>
-    <div class="relative bg-gray-100 backdrop-blur-lg rounded-2xl shadow-2xl w-full max-w-lg mx-4 border border-white/20/50 animate-scale-in" style="animation: scaleIn 0.3s ease-out;">
-        <div class="p-6">
-            <!-- Header -->
-            <div class="text-center mb-5">
-                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-400 mb-3 shadow-lg animate-bounce-subtle">
-                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+<!-- Modal Petunjuk & Doa (Professional Exam Style) -->
+<div id="instructionModal" class="fixed inset-0 flex items-center justify-center z-50 hidden" style="backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);">
+    <div class="absolute inset-0 bg-slate-900/60"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-5xl mx-4 overflow-hidden animate-scale-in flex flex-col max-h-[90vh]">
+        <!-- Top Decoration -->
+        <div class="h-2 bg-gradient-to-r from-blue-500 via-indigo-500 to-blue-500 flex-shrink-0"></div>
+        
+        <div class="flex flex-col md:flex-row h-full overflow-hidden">
+            <!-- Left Side: Exam Details -->
+            <div class="w-full md:w-1/3 bg-slate-50 p-8 border-r border-slate-200 flex flex-col justify-center relative overflow-hidden">
+                <!-- Background Pattern -->
+                <div class="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none">
+                    <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                                <path d="M 20 0 L 0 0 0 20" fill="none" stroke="currentColor" stroke-width="1"/>
+                            </pattern>
+                        </defs>
+                        <rect width="100%" height="100%" fill="url(#grid)" />
                     </svg>
                 </div>
-                <h2 class="text-2xl font-bold text-black mb-1">Petunjuk Pengerjaan Quiz</h2>
-                <p class="text-gray-600 text-sm truncate">{{ $quiz->judul }}</p>
+
+                <div class="relative z-10 text-center">
+                    <div class="w-20 h-20 bg-white rounded-2xl shadow-lg mx-auto mb-6 flex items-center justify-center text-blue-600">
+                        <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                        </svg>
+                    </div>
+                    
+                    <h2 class="text-2xl font-bold text-slate-800 mb-2">Konfirmasi Ujian</h2>
+                    <p class="text-slate-500 text-sm mb-8">Harap cek detail ujian sebelum memulai</p>
+
+                    <div class="space-y-4">
+                        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                            <div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Durasi Pengerjaan</div>
+                            <div class="font-bold text-slate-800 text-xl flex items-center justify-center gap-2">
+                                <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                {{ $quiz->durasi ?? '∞' }} Menit
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                            <div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Jumlah Soal</div>
+                            <div class="font-bold text-slate-800 text-xl flex items-center justify-center gap-2">
+                                <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                                </svg>
+                                {{ $quiz->questions->count() }} Soal
+                            </div>
+                        </div>
+
+                        <div class="bg-yellow-50 p-4 rounded-xl border border-yellow-200 shadow-sm">
+                            <div class="text-xs text-yellow-600 uppercase tracking-wider mb-1">Target KKM</div>
+                            <div class="font-bold text-yellow-700 text-xl flex items-center justify-center gap-2">
+                                <svg class="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                {{ $quiz->mapel->kkm }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <!-- Petunjuk -->
-            <div class="mb-5 space-y-3">
-                <div class="bg-blue-100 backdrop-blur-sm border-l-4 border-blue-400 p-3 rounded-r-lg shadow-sm">
-                    <h3 class="font-semibold text-blue-900 mb-2 flex items-center gap-2 text-sm">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
-                        </svg>
-                        Petunjuk Umum
+            <!-- Right Side: Instructions -->
+            <div class="w-full md:w-2/3 p-8 flex flex-col overflow-y-auto">
+                <div class="mb-6">
+                    <h3 class="text-lg font-bold text-slate-800 uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                        Tata Tertib & Petunjuk
                     </h3>
-                    <ul class="text-xs text-blue-800 space-y-1.5 list-disc list-inside">
-                        <li>Bacalah setiap soal dengan teliti sebelum menjawab</li>
-                        <li>Pilih jawaban yang paling tepat untuk setiap pertanyaan</li>
-                        <li>Anda dapat mengubah jawaban sebelum menekan tombol Submit</li>
-                        @if($quiz->durasi)
-                            <li>Waktu pengerjaan: <strong class="text-blue-900">{{ $quiz->durasi }} menit</strong></li>
-                            <li>Quiz akan otomatis tersubmit ketika waktu habis</li>
-                        @endif
-                        <li>Pastikan semua jawaban sudah diisi sebelum submit</li>
-                    </ul>
+                    <div class="space-y-4">
+                        <div class="flex gap-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
+                            <div class="flex-shrink-0 w-8 h-8 rounded-full bg-white text-blue-600 border border-blue-100 flex items-center justify-center font-bold shadow-sm">1</div>
+                            <div>
+                                <h4 class="font-semibold text-slate-800 text-sm">Waktu Pengerjaan</h4>
+                                <p class="text-sm text-slate-500 mt-1">Waktu akan otomatis berjalan mundur saat Anda menekan tombol "Mulai Kerjakan". Ujian akan tertutup otomatis jika waktu habis.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex gap-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
+                            <div class="flex-shrink-0 w-8 h-8 rounded-full bg-white text-blue-600 border border-blue-100 flex items-center justify-center font-bold shadow-sm">2</div>
+                            <div>
+                                <h4 class="font-semibold text-slate-800 text-sm">Integritas Ujian</h4>
+                                <p class="text-sm text-slate-500 mt-1">Dilarang membuka tab lain, aplikasi lain, atau melakukan kecurangan. Sistem memantau aktivitas layar Anda.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
+                            <div class="flex-shrink-0 w-8 h-8 rounded-full bg-white text-blue-600 border border-blue-100 flex items-center justify-center font-bold shadow-sm">3</div>
+                            <div>
+                                <h4 class="font-semibold text-slate-800 text-sm">Submit Jawaban</h4>
+                                <p class="text-sm text-slate-500 mt-1">Periksa kembali seluruh jawaban sebelum melakukan Submit. Jawaban yang sudah disubmit tidak dapat diubah kembali.</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="bg-green-50 backdrop-blur-sm border-l-4 border-green-500 p-3 rounded-r-lg shadow-sm">
-                    <h3 class="font-semibold text-green-900 mb-2 flex items-center gap-2 text-sm">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                        </svg>
-                        Tips Sukses
-                    </h3>
-                    <ul class="text-xs text-green-800 space-y-1.5 list-disc list-inside">
-                        <li>Kelola waktu dengan baik</li>
-                        <li>Jawab soal yang mudah terlebih dahulu</li>
-                        <li>Periksa kembali jawaban sebelum submit</li>
-                        <li>Tenang dan percaya diri</li>
-                    </ul>
-                </div>
-            </div>            
-
-            <!-- Button -->
-            <div class="flex justify-center">
-                <button id="startQuizBtn" class="px-8 py-3 text-sm font-semibold text-white bg-blue-400 rounded-xl hover:bg-blue-500 focus:ring-4 focus:outline-none focus:ring-blue-200 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 active:scale-95">
-                    <span class="flex items-center gap-2">
+                <div class="mt-auto pt-6 border-t border-slate-100 flex gap-4">
+                    <a href="{{ route('siswa.quiz.index') }}" class="px-6 py-3 text-sm font-medium text-slate-600 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 transition-colors">
+                        Batalkan
+                    </a>
+                    <button id="startQuizBtn" class="flex-1 px-8 py-3 text-sm font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-600/30 transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2">
+                        <span>Saya Mengerti & Mulai Kerjakan</span>
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
                         </svg>
-                        Mulai Quiz
-                    </span>
-                </button>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -606,9 +653,34 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         const answered = document.querySelectorAll('.question-radio:checked').length;
+        let message = 'Apakah Anda yakin ingin mengumpulkan jawaban?';
 
         if (answered < totalQuestions) {
-            const confirmSubmit = confirm('Anda belum menjawab semua soal. Yakin ingin submit?');
+            message = 'Anda belum menjawab semua soal. ' + message;
+        }
+
+        // Use SweetAlert if available, otherwise fallback to confirm
+        if (typeof Swal !== 'undefined') {
+            e.preventDefault();
+            Swal.fire({
+                title: 'Konfirmasi Submit',
+                text: message,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, Submit!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    quizSubmitting = true;
+                    clearInterval(timerInterval);
+                    quizForm.submit();
+                }
+            });
+            return;
+        } else {
+            const confirmSubmit = confirm(message);
             if (!confirmSubmit) {
                 e.preventDefault();
                 return;

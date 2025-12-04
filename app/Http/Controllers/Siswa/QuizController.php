@@ -96,7 +96,7 @@ class QuizController extends Controller
 
     public function show($id)
     {
-        $quiz = Quiz::with('questions')->findOrFail($id);
+        $quiz = Quiz::with(['questions', 'mapel.kelas'])->findOrFail($id);
         $user = Auth::user();
         
         // Check attempt count
@@ -115,46 +115,87 @@ class QuizController extends Controller
                 ->with('error', 'Anda sudah mencapai batas maksimal 3 kali attempt untuk quiz ini.');
         }
 
-        // Check if there's an active session that's not submitted
+        // Check if there's an active session
         $activeSession = QuizSession::where('quiz_id', $id)
             ->where('siswa_id', $user->id)
             ->where('status', '!=', 'submitted')
             ->first();
 
         if ($activeSession) {
-            // Continue existing session
-            $session = $activeSession;
-        } else {
-            // Check if there's a completed result but still can retry
-            $latestResult = QuizResult::where('quiz_id', $id)
-                ->where('siswa_id', $user->id)
-                ->latest()
-                ->first();
+            // If session exists, redirect to attempt page directly
+            return redirect()->route('siswa.quiz.attempt', $id);
+        }
 
-            if ($latestResult && $attemptCount < 3) {
-                // User can retry, delete old session and create new one
-                QuizSession::where('quiz_id', $id)
-                    ->where('siswa_id', $user->id)
-                    ->delete();
+        return view('siswa.quiz.cover', compact('quiz'));
+    }
+
+    public function start(Request $request, $id)
+    {
+        $quiz = Quiz::with('questions')->findOrFail($id);
+        $user = Auth::user();
+
+        // Check attempt count
+        $attemptCount = QuizResult::where('quiz_id', $id)
+            ->where('siswa_id', $user->id)
+            ->count();
+
+        if ($attemptCount >= 3) {
+            return redirect()->route('siswa.quiz.index')
+                ->with('error', 'Anda sudah mencapai batas maksimal 3 kali attempt.');
+        }
+
+        // Check for ANY existing session (active or submitted)
+        $session = QuizSession::where('quiz_id', $id)
+            ->where('siswa_id', $user->id)
+            ->first();
+
+        if ($session) {
+            if ($session->status == 'active') {
+                // Session is already active, just resume it
+                return redirect()->route('siswa.quiz.attempt', $id);
             }
+            
+            // If status is submitted (or anything else), and we are here (attempts < 3),
+            // we want to RESTART. So we update the existing record to avoid Unique Constraint Violation.
+            $session->update([
+                'status' => 'active',
+                'started_at' => now(),
+                'last_resumed_at' => now(),
+                'server_remaining_seconds' => $quiz->durasi ? $quiz->durasi * 60 : null,
+                'warning_count' => 0,
+                'question_order' => null, // Reset randomization for new attempt
+                'option_mapping' => null, // Reset randomization for new attempt
+                'paused_at' => null,
+                'submitted_at' => null,
+            ]);
+        } else {
+            // No session exists, create new one
+            $session = QuizSession::create([
+                'quiz_id' => $quiz->id,
+                'siswa_id' => $user->id,
+                'status' => 'active',
+                'started_at' => now(),
+                'last_resumed_at' => now(),
+                'server_remaining_seconds' => $quiz->durasi ? $quiz->durasi * 60 : null,
+                'warning_count' => 0,
+            ]);
+        }
 
-            // Use updateOrCreate to avoid duplicate entry error
-            // This will update existing session or create new one
-            $session = QuizSession::updateOrCreate(
-                [
-                    'quiz_id' => $quiz->id,
-                    'siswa_id' => $user->id,
-                ],
-                [
-                    'status' => 'active',
-                    'started_at' => now(),
-                    'last_resumed_at' => now(),
-                    'server_remaining_seconds' => $quiz->durasi ? $quiz->durasi * 60 : null,
-                    'warning_count' => 0,
-                    'paused_at' => null,
-                    'submitted_at' => null,
-                ]
-            );
+        return redirect()->route('siswa.quiz.attempt', $id);
+    }
+
+    public function attempt($id)
+    {
+        $quiz = Quiz::with('questions')->findOrFail($id);
+        $user = Auth::user();
+
+        $session = QuizSession::where('quiz_id', $id)
+            ->where('siswa_id', $user->id)
+            ->where('status', '!=', 'submitted')
+            ->first();
+
+        if (!$session) {
+            return redirect()->route('siswa.quiz.show', $id);
         }
 
         if ($session->status !== 'submitted') {
@@ -162,7 +203,6 @@ class QuizController extends Controller
                 'status' => 'active',
                 'paused_at' => null,
                 'last_resumed_at' => now(),
-                'started_at' => $session->started_at ?? now(),
             ]);
         }
 
@@ -278,7 +318,7 @@ class QuizController extends Controller
 
         $maxWarnings = QuizSessionController::MAX_WARNINGS ?? 3;
 
-        return view('siswa.quiz.show', [
+        return view('siswa.quiz.attempt', [
             'quiz' => $quiz,
             'session' => $session,
             'remainingSeconds' => $remainingSeconds,
@@ -328,29 +368,9 @@ class QuizController extends Controller
             }
         }
 
-        // Calculate total possible score (use skor if available, otherwise default to 1 per question)
-        $totalMaxSkor = 0;
-        foreach ($quiz->questions as $question) {
-            $totalMaxSkor += $question->skor ?? 1;
-        }
-        
-        foreach ($quiz->questions as $question) {
-            $userAnswer = $convertedJawaban[$question->id] ?? null;
-            
-            if ($userAnswer && $userAnswer == $question->jawaban_benar) {
-                $jawabanBenar++;
-                $totalSkor += $question->skor ?? 1;
-            }
-        }
-
-        // Calculate nilai based on total possible score
-        // If no skor system, calculate based on number of correct answers
-        if ($totalMaxSkor > 0) {
-            $nilai = ($totalSkor / $totalMaxSkor) * 100;
-        } else {
-            // Fallback: calculate based on correct answers count
-            $nilai = $totalSoal > 0 ? ($jawabanBenar / $totalSoal) * 100 : 0;
-        }
+        // Calculate nilai based on number of correct answers (Equal weight for all questions)
+        // Client request: "menyesuaikan dari soalnya misal soal nya 5 jika jawabannya 5 benar maka dapat 100"
+        $nilai = $totalSoal > 0 ? ($jawabanBenar / $totalSoal) * 100 : 0;
 
         // Calculate attempt number
         $previousAttempts = QuizResult::where('quiz_id', $quiz->id)

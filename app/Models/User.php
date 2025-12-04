@@ -83,7 +83,7 @@ class User extends Authenticatable
         return $this->hasMany(Materi::class, 'pengajar_id');
     }
 
-    public function quiz()
+    public function quizzes()
     {
         return $this->hasMany(Quiz::class, 'pengajar_id');
     }
@@ -132,5 +132,10 @@ class User extends Authenticatable
     public function isWali()
     {
         return $this->role === 'wali';
+    }
+
+    public function isPemilik()
+    {
+        return $this->role === 'pemilik';
     }
 }

@@ -14,6 +14,7 @@ class GamificationService
     public function calculatePoints(QuizResult $result): int
     {
         $nilai = $result->nilai;
+        $points = 10; // Poin dasar partisipasi (Participation Reward)
         
         // Get gamification settings
         $settings = GamificationSetting::orderBy('nilai_min', 'desc')->get();
@@ -21,17 +22,18 @@ class GamificationService
         foreach ($settings as $setting) {
             if ($setting->nilai_min !== null && $setting->nilai_max !== null) {
                 if ($nilai >= $setting->nilai_min && $nilai <= $setting->nilai_max) {
-                    return $setting->poin;
+                    $points += $setting->poin;
+                    break; // Hanya ambil satu rule tertinggi yang cocok
                 }
             } elseif ($setting->nilai_min !== null) {
                 if ($nilai >= $setting->nilai_min) {
-                    return $setting->poin;
+                    $points += $setting->poin;
+                    break;
                 }
             }
         }
         
-        // Default points if no rule matches
-        return 10;
+        return $points;
     }
 
     /**

@@ -36,21 +36,21 @@
         <h2 class="text-xl font-semibold text-black">Daftar Hasil Quiz</h2>
     </div>
     <div class="overflow-x-auto">
-        <table class="w-full text-sm text-left text-black">
+        <table class="w-full text-sm text-left text-black whitespace-nowrap">
             <thead class="text-xs text-gray-700 uppercase bg-gray-100">
                 <tr>
                     <th scope="col" class="px-6 py-3">Siswa</th>
                     <th scope="col" class="px-6 py-3">Quiz</th>
                     <th scope="col" class="px-6 py-3">Mata Pelajaran</th>
                     <th scope="col" class="px-6 py-3">Nilai</th>
-                    <th scope="col" class="px-6 py-3">Jawaban Benar</th>
+                    <th scope="col" class="px-6 py-3">Status</th>
                     <th scope="col" class="px-6 py-3">Tanggal</th>
                     <th scope="col" class="px-6 py-3">Aksi</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($results as $result)
-                    <tr class="bg-white border-b border-gray-200">
+                    <tr class="bg-white border-b border-gray-200 hover:bg-gray-50">
                         <td class="px-6 py-4 font-medium text-black">{{ $result->siswa->name }}</td>
                         <td class="px-6 py-4 text-black">{{ $result->quiz->judul }}</td>
                         <td class="px-6 py-4 text-black">{{ $result->quiz->mapel->nama }}</td>
@@ -63,7 +63,15 @@
                                 {{ $result->nilai }}
                             </span>
                         </td>
-                        <td class="px-6 py-4 text-black">{{ $result->jawaban_benar }}/{{ $result->total_soal }}</td>
+                        <td class="px-6 py-4">
+                            @php
+                                $kkm = $result->quiz->mapel->kkm ?? 70;
+                                $lulus = $result->nilai >= $kkm;
+                            @endphp
+                            <span class="px-2 py-1 rounded-full text-xs font-bold {{ $lulus ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
+                                {{ $lulus ? 'LULUS' : 'TIDAK LULUS' }}
+                            </span>
+                        </td>
                         <td class="px-6 py-4 text-black">{{ $result->created_at->format('d M Y H:i') }}</td>
                         <td class="px-6 py-4">
                             <a href="{{ route('pengajar.results.show', $result->id) }}" class="text-blue-600 hover:underline mr-3">Detail</a>

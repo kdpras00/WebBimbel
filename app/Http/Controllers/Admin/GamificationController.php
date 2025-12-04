@@ -17,7 +17,7 @@ class GamificationController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nama_aturan' => 'required|string|max:255',
+            'nama_aturan' => 'required|string|max:255|unique:gamification_settings,nama_aturan',
             'nilai_min' => 'nullable|integer|min:0|max:100',
             'nilai_max' => 'nullable|integer|min:0|max:100',
             'poin' => 'required|integer|min:0',
@@ -41,7 +41,7 @@ class GamificationController extends Controller
         $setting = GamificationSetting::findOrFail($id);
 
         $validated = $request->validate([
-            'nama_aturan' => 'required|string|max:255',
+            'nama_aturan' => 'required|string|max:255|unique:gamification_settings,nama_aturan,' . $id,
             'nilai_min' => 'nullable|integer|min:0|max:100',
             'nilai_max' => 'nullable|integer|min:0|max:100',
             'poin' => 'required|integer|min:0',

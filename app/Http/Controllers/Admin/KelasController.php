@@ -23,11 +23,13 @@ class KelasController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nama' => 'required|string|max:255',
+            'nama' => 'required|string|max:255|unique:kelas,nama',
             'deskripsi' => 'nullable|string',
             'kelas_number' => 'nullable|integer|min:1|max:12',
             'jurusan' => 'nullable|array',
             'jurusan.*' => 'in:IPA,IPS',
+        ], [
+            'nama.unique' => 'class name already exist',
         ]);
 
         // Jika kelas_number ada, gunakan itu untuk set nama
@@ -61,11 +63,13 @@ class KelasController extends Controller
         $kelas = Kelas::findOrFail($id);
 
         $validated = $request->validate([
-            'nama' => 'required|string|max:255',
+            'nama' => 'required|string|max:255|unique:kelas,nama,' . $id,
             'deskripsi' => 'nullable|string',
             'kelas_number' => 'nullable|integer|min:1|max:12',
             'jurusan' => 'nullable|array',
             'jurusan.*' => 'in:IPA,IPS',
+        ], [
+            'nama.unique' => 'class name already exist',
         ]);
 
         // Jika kelas_number ada, gunakan itu untuk set nama

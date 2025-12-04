@@ -5,15 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Bimbel HIKARI</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
-<body class="bg-blue-400">
+<body class="bg-blue-400" x-data="{ loading: false }">
+    <!-- Loading Overlay -->
+    <div x-show="loading" 
+         class="fixed inset-0 z-50 flex items-center justify-center bg-blue-400 bg-opacity-90 backdrop-blur-sm transition-opacity"
+         style="display: none;">
+        <div class="text-center">
+            <div class="inline-flex p-4 bg-white rounded-2xl shadow-xl animate-bounce mb-4">
+                <svg class="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-white tracking-tight animate-pulse">Memproses...</h2>
+        </div>
+    </div>
+
     <div class="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
         <div class="w-full rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0" style="background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);">
             <div class="p-6 space-y-4 md:space-y-6 sm:p-8">
                 <h1 class="text-xl font-bold leading-tight tracking-tight text-black md:text-2xl text-center w-full">
                     Bimbel HIKARI
                 </h1>
-                <form class="space-y-4 md:space-y-6" method="POST" action="{{ route('login') }}">
+                <form class="space-y-4 md:space-y-6" method="POST" action="{{ route('login') }}" @submit="loading = true">
                     @csrf
                     
                     <div>
@@ -66,8 +81,11 @@
                     </div>
                     
                     <button type="submit" 
-                            class="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
-                        Masuk
+                            class="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                            :disabled="loading"
+                            :class="{ 'opacity-50 cursor-not-allowed': loading }">
+                        <span x-show="!loading">Masuk</span>
+                        <span x-show="loading">Memuat...</span>
                     </button>
                 </form>
             </div>

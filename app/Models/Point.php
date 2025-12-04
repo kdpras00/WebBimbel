@@ -16,4 +16,19 @@ class Point extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function getBadgeAttribute()
+    {
+        $points = $this->total_poin;
+
+        if ($points >= 1000) {
+            return 'Diamond';
+        } elseif ($points >= 500) {
+            return 'Gold';
+        } elseif ($points >= 200) {
+            return 'Silver';
+        } else {
+            return 'Bronze';
+        }
+    }
 }
