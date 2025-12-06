@@ -9,12 +9,14 @@ class Informasi extends Model
     protected $fillable = [
         'judul',
         'deskripsi',
-        'tanggal',
+        'tanggal_mulai',
+        'tanggal_berakhir',
         'is_active',
     ];
 
     protected $casts = [
-        'tanggal' => 'date',
+        'tanggal_mulai' => 'date',
+        'tanggal_berakhir' => 'date',
         'is_active' => 'boolean',
     ];
 }

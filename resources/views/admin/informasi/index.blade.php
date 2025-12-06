@@ -15,11 +15,11 @@
 
 <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
     <div class="overflow-x-auto">
-        <table class="w-full text-sm text-left text-slate-600">
+        <table class="w-full min-w-[800px] text-sm text-left text-slate-600">
             <thead class="text-xs text-slate-700 uppercase bg-slate-50 border-b border-slate-200">
                 <tr>
                     <th scope="col" class="px-6 py-3">Judul</th>
-                    <th scope="col" class="px-6 py-3">Tanggal</th>
+                    <th scope="col" class="px-6 py-3">Periode Tanggal</th>
                     <th scope="col" class="px-6 py-3">Status</th>
                     <th scope="col" class="px-6 py-3">Aksi</th>
                 </tr>
@@ -28,7 +28,13 @@
                 @forelse($informasi as $info)
                     <tr class="hover:bg-slate-50 transition-colors">
                         <td class="px-6 py-4 font-medium text-slate-900">{{ $info->judul }}</td>
-                        <td class="px-6 py-4">{{ $info->tanggal->format('d F Y') }}</td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-2 text-xs">
+                                <span class="font-semibold text-slate-700 whitespace-nowrap">{{ $info->tanggal_mulai ? $info->tanggal_mulai->format('d M Y') : '-' }}</span>
+                                <span class="text-slate-400">s/d</span>
+                                <span class="font-semibold text-slate-700 whitespace-nowrap">{{ $info->tanggal_berakhir ? $info->tanggal_berakhir->format('d M Y') : '-' }}</span>
+                            </div>
+                        </td>
                         <td class="px-6 py-4">
                             @if($info->is_active)
                                 <span class="px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">Aktif</span>

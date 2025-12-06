@@ -8,6 +8,41 @@
     <p class="mt-2 text-gray-100">Selamat datang, {{ Auth::user()->name }}!</p>
 </div>
 
+@if(isset($informasi) && $informasi)
+    <div class="mb-8 relative overflow-hidden bg-white rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-all duration-300 group">
+        <!-- Decorative Gradient Bar -->
+        <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-blue-500 to-indigo-600"></div>
+        
+        <div class="p-5 pl-8 flex items-start gap-4">
+            <!-- Icon Box -->
+            <div class="shrink-0 p-3 bg-blue-50 text-blue-600 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+                </svg>
+            </div>
+            
+            <!-- Content -->
+            <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700 uppercase tracking-wide">
+                        Informasi Terbaru
+                    </span>
+                    <span class="text-xs text-slate-400 flex items-center gap-1">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        {{ \Carbon\Carbon::parse($informasi->tanggal_mulai)->format('d M Y') }}
+                    </span>
+                </div>
+                <h3 class="text-lg font-bold text-slate-800 mb-1 group-hover:text-blue-600 transition-colors">
+                    {{ $informasi->judul }}
+                </h3>
+                <p class="text-slate-600 text-sm leading-relaxed">
+                    {{ $informasi->deskripsi }}
+                </p>
+            </div>
+        </div>
+    </div>
+@endif
+
 <!-- Stats Cards -->
 <div class="grid grid-cols-1 gap-6 mb-6 lg:grid-cols-4">
     <div class="p-6 rounded-2xl bg-white shadow-sm border border-slate-100 hover:shadow-md transition-shadow duration-300">

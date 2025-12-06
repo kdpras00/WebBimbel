@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Materi;
 use App\Models\Quiz;
 use App\Models\QuizResult;
+use App\Models\Informasi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -36,6 +37,13 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
-        return view('pengajar.dashboard', compact('stats', 'recentMateri', 'recentQuiz'));
+        // Fetch announcements (same logic as Siswa/Wali dashboard)
+        $informasi = Informasi::where('is_active', true)
+            ->whereDate('tanggal_mulai', '<=', now())
+            ->whereDate('tanggal_berakhir', '>=', now())
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        return view('pengajar.dashboard', compact('stats', 'recentMateri', 'recentQuiz', 'informasi'));
     }
 }

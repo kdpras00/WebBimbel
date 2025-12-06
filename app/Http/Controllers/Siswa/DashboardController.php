@@ -30,8 +30,10 @@ class DashboardController extends Controller
         $latestResult = $allResults->sortByDesc('created_at')->first();
         
         // Limit to only 1 latest active information, published within last 3 days
+        // Limit to only 1 latest active information, published within date range
         $informasi = \App\Models\Informasi::where('is_active', true)
-            ->where('tanggal', '>=', now()->subDays(3))
+            ->whereDate('tanggal_mulai', '<=', now())
+            ->whereDate('tanggal_berakhir', '>=', now())
             ->latest()
             ->take(1)
             ->get();

@@ -10,7 +10,7 @@ class InformasiController extends Controller
 {
     public function index()
     {
-        $informasi = Informasi::orderBy('tanggal', 'desc')->get();
+        $informasi = Informasi::orderBy('tanggal_mulai', 'desc')->get();
         return view('admin.informasi.index', compact('informasi'));
     }
 
@@ -24,7 +24,8 @@ class InformasiController extends Controller
         $validated = $request->validate([
             'judul' => 'required|string|max:255',
             'deskripsi' => 'required|string',
-            'tanggal' => 'required|date',
+            'tanggal_mulai' => 'required|date',
+            'tanggal_berakhir' => 'required|date|after_or_equal:tanggal_mulai',
             'is_active' => 'boolean',
         ]);
 
@@ -49,7 +50,8 @@ class InformasiController extends Controller
         $validated = $request->validate([
             'judul' => 'required|string|max:255',
             'deskripsi' => 'required|string',
-            'tanggal' => 'required|date',
+            'tanggal_mulai' => 'required|date',
+            'tanggal_berakhir' => 'required|date|after_or_equal:tanggal_mulai',
             'is_active' => 'boolean',
         ]);
 

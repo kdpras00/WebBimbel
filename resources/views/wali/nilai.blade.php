@@ -3,267 +3,302 @@
 @section('title', 'Nilai Anak')
 
 @section('content')
-<div class="mb-8">
-    <div class="flex items-center justify-between">
+<div class="space-y-8" x-data="{ activeIndex: 0, dropdownOpen: false }">
+    <!-- Page Header & Child Selector -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
         <div>
-            <h1 class="text-4xl font-bold text-white mb-2">Nilai Anak</h1>
-            <p class="text-gray-100 text-lg">Lihat hasil belajar dan nilai anak Anda</p>
+            <h1 class="text-3xl font-bold text-white">Nilai Anak</h1>
+            <p class="mt-2 text-blue-100">Lihat hasil belajar dan nilai detail anak Anda</p>
         </div>
-        <div>
-            <a href="{{ route('wali.nilai.download-pdf') }}" 
-               target="_blank"
-               class="inline-flex items-center px-6 py-3 bg-red-600 text-white font-semibold rounded-lg shadow-lg hover:bg-red-700 hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5">
-                <svg class="w-5 h-5 mr-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        
+        <div class="flex items-center gap-4">
+             @if(count($gradesData) > 0)
+                <!-- Custom Dropdown Selector -->
+                <div class="relative min-w-[250px] z-20">
+                    <button @click="dropdownOpen = !dropdownOpen" 
+                            @click.away="dropdownOpen = false"
+                            class="w-full bg-white text-slate-700 font-semibold py-3 px-5 rounded-xl shadow-lg flex items-center justify-between hover:bg-slate-50 transition-all border border-slate-100">
+                        <div class="flex items-center gap-3">
+                            <span class="text-sm text-slate-400 font-normal">Pilih Anak:</span>
+                            <span x-text="'{{ $gradesData[0]['anak']->name }}'"></span>
+                        </div>
+                        <svg class="w-5 h-5 text-slate-400 transition-transform duration-300" 
+                             :class="dropdownOpen ? 'rotate-180' : ''" 
+                             fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+    
+                    <!-- Dropdown List -->
+                    <div x-show="dropdownOpen" 
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 translate-y-2 scale-95"
+                         x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                         x-transition:leave="transition ease-in duration-150"
+                         x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                         x-transition:leave-end="opacity-0 translate-y-2 scale-95"
+                         class="absolute right-0 mt-2 w-full bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden"
+                         style="display: none;">
+                        @foreach($gradesData as $index => $data)
+                            <button @click="activeIndex = {{ $index }}; dropdownOpen = false" 
+                                    class="w-full text-left px-5 py-3 hover:bg-blue-50 transition-colors flex items-center gap-3 group border-b border-slate-50 last:border-0">
+                                <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors"
+                                     :class="activeIndex === {{ $index }} ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500 group-hover:bg-blue-200 group-hover:text-blue-700'">
+                                    {{ substr($data['anak']->name, 0, 1) }}
+                                </div>
+                                <span class="font-medium text-slate-700 group-hover:text-blue-700" :class="activeIndex === {{ $index }} ? 'text-blue-600' : ''">
+                                    {{ $data['anak']->name }}
+                                </span>
+                                <svg x-show="activeIndex === {{ $index }}" class="w-5 h-5 text-blue-600 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                            </button>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+
+            <!-- Download PDF Button -->
+            <a href="{{ route('wali.nilai.download-pdf') }}" target="_blank" class="flex items-center gap-2 bg-red-600 text-white px-5 py-3 rounded-xl hover:bg-red-700 transition-colors shadow-lg hover:shadow-red-500/30 font-semibold">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
                 </svg>
-                <span class="text-white font-semibold">Download PDF</span>
+                Download PDF
             </a>
         </div>
     </div>
-</div>
 
-@if($anak->count() > 0)
-
-<div class="mb-6 rounded-xl shadow-lg bg-white p-5 border border-gray-100">
-    <label class="block mb-3 text-sm font-semibold text-white flex items-center">
-        <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
-        </svg>
-        Filter berdasarkan anak:
-    </label>
-    <select id="filterChild" class="bg-white border-2 border-gray-200 text-gray-800 text-sm rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 block w-full md:w-64 p-3 transition-all duration-200 hover:border-blue-300">
-        <option value="all">Semua Anak</option>
-        @foreach($anak as $child)
-        <option value="{{ $child->id }}">{{ $child->name }}</option>
-        @endforeach
-    </select>
-</div>
-
-<!-- Progress Cards -->
-<div class="space-y-6 mb-6">
-    @foreach($anak as $index => $child)
-    @php
-    $progress = $progressData[$child->id] ?? ['avg_score' => 0, 'total_quiz' => 0, 'best_score' => 0];
-    @endphp
-    <div class="group relative overflow-hidden rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 bg-white border border-gray-200 child-progress-card" data-child="{{ $child->id }}">
-        <div class="p-6">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-2xl font-bold text-black">{{ $child->name }}</h3>
-                <div class="bg-blue-100 p-3 rounded-lg">
-                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                    </svg>
-                </div>
-            </div>
-            <div class="grid grid-cols-3 gap-6">
-                <div class="text-center bg-gray-50 rounded-xl p-5 border border-gray-200">
-                    <p class="text-sm font-medium text-gray-600 mb-2">Rata-rata</p>
-                    <p class="text-3xl font-bold text-black">{{ number_format($progress['avg_score'], 1) }}</p>
-                </div>
-                <div class="text-center bg-gray-50 rounded-xl p-5 border border-gray-200">
-                    <p class="text-sm font-medium text-gray-600 mb-2">Total Quiz</p>
-                    <p class="text-3xl font-bold text-black">{{ $progress['total_quiz'] }}</p>
-                </div>
-                <div class="text-center bg-gray-50 rounded-xl p-5 border border-gray-200">
-                    <p class="text-sm font-medium text-gray-600 mb-2">Tertinggi</p>
-                    <p class="text-3xl font-bold text-black">{{ $progress['best_score'] }}</p>
-                </div>
-            </div>
-        </div>
-    </div>
-    @endforeach
-</div>
-
-<!-- Filter by Child -->
-
-<!-- Results Table -->
-<div class="rounded-xl shadow-lg bg-white border border-gray-100 overflow-hidden">
-    <div class="bg-gradient-to-r from-blue-600 to-blue-700 p-6">
-        <h2 class="text-2xl font-bold text-white flex items-center">
-            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-            </svg>
-            Daftar Nilai
-        </h2>
-    </div>
-    <div class="overflow-x-auto">
-        <table class="w-full text-sm text-left">
-            <thead class="text-xs text-gray-700 uppercase bg-gray-50 border-b border-gray-200">
-                <tr>
-                    <th scope="col" class="px-6 py-4 font-semibold">Anak</th>
-                    <th scope="col" class="px-6 py-4 font-semibold">Quiz</th>
-                    <th scope="col" class="px-6 py-4 font-semibold">Mata Pelajaran</th>
-                    <th scope="col" class="px-6 py-4 font-semibold">Nilai</th>
-                    <th scope="col" class="px-6 py-4 font-semibold">Jawaban Benar</th>
-                    <th scope="col" class="px-6 py-4 font-semibold">Tanggal</th>
-                    <th scope="col" class="px-6 py-4 font-semibold">Aksi</th>
-                </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-100">
-                @forelse($results as $result)
-                <tr class="hover:bg-blue-50 transition-colors duration-150" data-child="{{ $result->siswa_id }}" data-result-id="{{ $result->id }}">
-                    <td class="px-6 py-4 font-medium text-gray-900">
-                        <div class="flex items-center">
-                            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-2">
-                                <span class="text-blue-600 text-xs font-bold">{{ substr($result->siswa->name, 0, 1) }}</span>
-                            </div>
-                            {{ $result->siswa->name }}
+    <!-- Content Area -->
+    <div class="min-h-[400px]">
+        @forelse($gradesData as $index => $data)
+            <div x-show="activeIndex === {{ $index }}" 
+                 x-effect="if(activeIndex === {{ $index }}) { $el.closest('[x-data]').querySelector('span[x-text]').innerText = '{{ $data['anak']->name }}' }"
+                 x-transition:enter="transition ease-out duration-300 transform"
+                 x-transition:enter-start="opacity-0 translate-y-4"
+                 x-transition:enter-end="opacity-100 translate-y-0"
+                 style="display: none;">
+                 
+                <!-- Child Overview Card -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 mb-8 flex items-center justify-between relative overflow-hidden group">
+                    <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-blue-500"></div>
+                    <div class="flex items-center gap-5 pl-4">
+                        <div class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center text-2xl font-bold shadow-lg shadow-blue-200">
+                            {{ substr($data['anak']->name, 0, 1) }}
                         </div>
-                    </td>
-                    <td class="px-6 py-4 text-gray-700">{{ $result->quiz->judul }}</td>
-                    <td class="px-6 py-4">
-                        <span class="px-3 py-1 text-xs font-medium rounded-full bg-indigo-100 text-indigo-800">
-                            {{ $result->quiz->mapel->nama }}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4">
-                        <span class="px-3 py-1.5 text-sm font-bold rounded-lg 
-                                    @if($result->nilai >= 80) bg-green-100 text-green-800 border border-green-200
-                                    @elseif($result->nilai >= 60) bg-yellow-100 text-yellow-800 border border-yellow-200
-                                    @else bg-red-100 text-red-800 border border-red-200
-                                    @endif">
-                            {{ $result->nilai }}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 text-gray-700">
-                        <span class="font-medium">{{ $result->jawaban_benar }}</span>
-                        <span class="text-gray-400">/</span>
-                        <span class="text-gray-600">{{ $result->total_soal }}</span>
-                    </td>
-                    <td class="px-6 py-4 text-gray-600">{{ $result->created_at->setTimezone('Asia/Jakarta')->format('d M Y, H:i') }} WIB</td>
-                    <td class="px-6 py-4">
+                        <div>
+                             <h2 class="text-2xl font-bold text-slate-800">{{ $data['anak']->name }}</h2>
+                             <p class="text-slate-500 flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                {{ $data['anak']->email }}
+                             </p>
+                        </div>
+                    </div>
+                </div>
+
+                @if($data['results']->count() > 0)
+                    <!-- Statistics Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                         @php
-                        $quiz = $result->quiz;
-                        $pengajar = $quiz->pengajar ?? null;
-                        $allFeedback = $result->feedback->sortByDesc('created_at');
+                            $avgScore = $data['stats']['avg_score'];
+                            $totalQuiz = $data['stats']['total_quiz'];
+                            $bestScore = $data['stats']['best_score'];
                         @endphp
-                        @if($pengajar)
-                        @php
-                        $feedbackJson = $allFeedback->map(function($f) {
-                        return [
-                        'pengajar' => $f->pengajar->name ?? 'Pengajar',
-                        'komentar' => $f->komentar,
-                        'tanggal' => $f->created_at->setTimezone('Asia/Jakarta')->format('d M Y, H:i') . ' WIB'
-                        ];
-                        })->values();
-                        @endphp
-                        <button
-                            onclick="showPengajarInfo({{ $pengajar->id }}, {{ json_encode($pengajar->name) }}, {{ json_encode($pengajar->email) }}, {{ $result->id }}, {{ json_encode($feedbackJson) }})"
-                            class="px-4 py-2 text-xs font-semibold bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center space-x-1"
-                            style="background: linear-gradient(to right, #2563eb, #1d4ed8);"
-                            onmouseover="this.style.background='linear-gradient(to right, #2563eb, #1d4ed8)'"
-                            onmouseout="this.style.background='linear-gradient(to right, #2563eb, #1d4ed8)'">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            <span>Info Pengajar</span>
-                        </button>
-                        @endif
-                    </td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="7" class="px-6 py-12 text-center">
-                        <div class="flex flex-col items-center">
-                            <svg class="w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        
+                        <!-- Rata-rata -->
+                        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-md transition-all duration-300 group hover:-translate-y-1">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-slate-500 mb-1">Rata-rata Nilai</p>
+                                    <h3 class="text-3xl font-bold {{ $avgScore >= 80 ? 'text-green-600' : ($avgScore >= 70 ? 'text-yellow-600' : 'text-red-600') }}">
+                                        {{ number_format($avgScore, 1) }}
+                                    </h3>
+                                </div>
+                                <div class="p-3 bg-blue-50 rounded-xl text-blue-600 group-hover:scale-110 transition-transform">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Total Quiz -->
+                        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-md transition-all duration-300 group hover:-translate-y-1">
+                             <div class="flex items-start justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-slate-500 mb-1">Total Quiz</p>
+                                    <h3 class="text-3xl font-bold text-slate-800">{{ $totalQuiz }}</h3>
+                                </div>
+                                 <div class="p-3 bg-purple-50 rounded-xl text-purple-600 group-hover:scale-110 transition-transform">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Nilai Tertinggi -->
+                        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-md transition-all duration-300 group hover:-translate-y-1">
+                             <div class="flex items-start justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-slate-500 mb-1">Nilai Tertinggi</p>
+                                    <h3 class="text-3xl font-bold text-green-600">{{ $bestScore }}</h3>
+                                </div>
+                                <div class="p-3 bg-green-50 rounded-xl text-green-600 group-hover:scale-110 transition-transform">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Grades Table -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-12">
+                        <div class="p-6 border-b border-slate-100">
+                            <h3 class="text-lg font-bold text-slate-800">Daftar Nilai Lengkap</h3>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full min-w-[1000px] text-sm text-left text-slate-600">
+                                 <thead class="text-xs text-slate-700 uppercase bg-slate-50 border-b border-slate-200">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-4 font-semibold">Quiz</th>
+                                        <th scope="col" class="px-6 py-4 font-semibold">Mapel</th>
+                                        <th scope="col" class="px-6 py-4 font-semibold text-center">Nilai</th>
+                                        <th scope="col" class="px-6 py-4 font-semibold">Jawaban Benar</th>
+                                        <th scope="col" class="px-6 py-4 font-semibold">Tanggal</th>
+                                        <th scope="col" class="px-6 py-4 font-semibold text-center">Aksi</th>
+                                    </tr>
+                                 </thead>
+                                 <tbody class="divide-y divide-slate-200">
+                                    @foreach($data['results'] as $result)
+                                        <tr class="hover:bg-slate-50 transition-colors">
+                                            <td class="px-6 py-4 font-medium text-slate-900">{{ $result->quiz->judul }}</td>
+                                            <td class="px-6 py-4">
+                                                <span class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-indigo-50 text-indigo-600 border border-indigo-100">
+                                                    {{ $result->quiz->mapel->nama }}
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4 text-center">
+                                                <span class="text-lg font-bold {{ $result->nilai >= ($result->quiz->mapel->kkm ?? 70) ? 'text-green-600' : 'text-red-600' }}">
+                                                    {{ $result->nilai }}
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                <span class="font-medium text-slate-700">{{ $result->jawaban_benar }}</span>
+                                                <span class="text-slate-400">/</span>
+                                                <span class="text-slate-500">{{ $result->total_soal }}</span>
+                                            </td>
+                                            <td class="px-6 py-4 text-slate-500">{{ $result->created_at->format('d M Y, H:i') }}</td>
+                                            <td class="px-6 py-4 text-center">
+                                                @php
+                                                    $quiz = $result->quiz;
+                                                    $pengajar = $quiz->pengajar ?? null;
+                                                    $allFeedback = $result->feedback->sortByDesc('created_at');
+                                                    $feedbackJson = $pengajar ? $allFeedback->map(function($f) {
+                                                        return [
+                                                            'pengajar' => $f->pengajar->name ?? 'Pengajar',
+                                                            'komentar' => $f->komentar,
+                                                            'tanggal' => $f->created_at->setTimezone('Asia/Jakarta')->format('d M Y, H:i') . ' WIB'
+                                                        ];
+                                                    })->values() : [];
+                                                @endphp
+
+                                                @if($pengajar)
+                                                    <button onclick="showPengajarInfo({{ $pengajar->id }}, '{{ $pengajar->name }}', '{{ $pengajar->email }}', {{ $result->id }}, {{ json_encode($feedbackJson) }})"
+                                                            class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors border border-blue-100">
+                                                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                        </svg>
+                                                        Info Pengajar
+                                                    </button>
+                                                @else
+                                                    <span class="text-xs text-slate-400 italic">Tidak ada info</span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                 </tbody>
+                            </table>
+                        </div>
+                    </div>
+                @else
+                    <!-- Empty State for Specific Child -->
+                    <div class="bg-white rounded-2xl p-12 text-center border border-slate-200 mb-12">
+                         <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-slate-100 mb-6 transition-transform">
+                            <svg class="w-10 h-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                             </svg>
-                            <p class="text-gray-500 text-lg font-medium">Belum ada hasil quiz</p>
                         </div>
-                    </td>
-                </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-    <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
-        {{ $results->links() }}
+                        <h3 class="text-xl font-bold text-slate-800 mb-2">Belum Ada Hasil Quiz</h3>
+                        <p class="text-slate-500 max-w-sm mx-auto">
+                            {{ $data['anak']->name }} belum memiliki nilai dari quiz apapun.
+                        </p>
+                    </div>
+                @endif
+            </div>
+        @empty
+            <!-- Global Empty State (No Children Linked) -->
+            <div class="bg-white rounded-2xl p-12 text-center border border-slate-200">
+                <svg class="w-16 h-16 text-slate-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                </svg>
+                <h3 class="text-lg font-bold text-slate-800">Belum Ada Anak Terdaftar</h3>
+                <p class="text-slate-500 mt-2">Silakan hubungi administrator untuk menghubungkan akun anak Anda.</p>
+            </div>
+        @endforelse
     </div>
 </div>
-@else
-<div class="rounded-xl shadow-lg bg-white border border-gray-100 p-12 text-center">
-    <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-    </svg>
-    <p class="text-gray-600 text-lg font-medium">Belum ada data anak yang terdaftar</p>
-</div>
-@endif
 
 <script>
-    document.getElementById('filterChild').addEventListener('change', function() {
-        const selectedChild = this.value;
-        const rows = document.querySelectorAll('tbody tr[data-child]');
-        const progressCards = document.querySelectorAll('.child-progress-card');
-
-        // Filter table rows
-        rows.forEach(row => {
-            if (selectedChild === 'all' || row.getAttribute('data-child') === selectedChild) {
-                row.style.display = '';
-            } else {
-                row.style.display = 'none';
-            }
-        });
-
-        // Filter progress cards
-        progressCards.forEach(card => {
-            if (selectedChild === 'all' || card.getAttribute('data-child') === selectedChild) {
-                card.style.display = '';
-            } else {
-                card.style.display = 'none';
-            }
-        });
-    });
-
     function showPengajarInfo(id, name, email, resultId, feedbackData) {
-        // Pastikan feedbackData adalah array
         if (!Array.isArray(feedbackData)) {
             feedbackData = [];
         }
 
         let htmlContent = '<div class="text-left">';
-        htmlContent += '<div class="mb-4 pb-4 border-b border-gray-200">';
-        htmlContent += '<p class="mb-2"><strong>Nama:</strong> ' + escapeHtml(name) + '</p>';
-        htmlContent += '<p class="mb-2"><strong>Email:</strong> ' + escapeHtml(email) + '</p>';
+        htmlContent += '<div class="mb-4 pb-4 border-b border-gray-100">';
+        htmlContent += '<p class="mb-2 text-slate-700"><strong>Nama:</strong> ' + escapeHtml(name) + '</p>';
+        htmlContent += '<p class="mb-2 text-slate-700"><strong>Email:</strong> ' + escapeHtml(email) + '</p>';
         htmlContent += '</div>';
 
-        // Tampilkan feedback jika ada
-        if (feedbackData && feedbackData.length > 0) {
+        if (feedbackData.length > 0) {
             htmlContent += '<div class="mt-4">';
-            htmlContent += '<h3 class="text-lg font-semibold text-gray-800 mb-3">Feedback dari Pengajar</h3>';
-            htmlContent += '<div class="space-y-4 max-h-96 overflow-y-auto">';
+            htmlContent += '<h3 class="text-md font-bold text-slate-800 mb-3 flex items-center gap-2"><svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg> Feedback Pengajar</h3>';
+            htmlContent += '<div class="space-y-3 max-h-60 overflow-y-auto pr-2 custom-scrollbar">';
 
-            feedbackData.forEach(function(feedback, index) {
-                htmlContent += '<div class="bg-blue-50 border border-blue-200 rounded-lg p-4' + (index < feedbackData.length - 1 ? ' mb-3' : '') + '">';
+            feedbackData.forEach(function(feedback) {
+                htmlContent += '<div class="bg-blue-50/50 border border-blue-100 rounded-xl p-4">';
                 htmlContent += '<div class="flex items-start justify-between mb-2">';
-                htmlContent += '<p class="text-sm font-semibold text-gray-700">' + escapeHtml(feedback.pengajar || 'Pengajar') + '</p>';
-                htmlContent += '<p class="text-xs text-gray-500">' + escapeHtml(feedback.tanggal || '') + '</p>';
+                htmlContent += '<span class="text-xs font-bold text-blue-700 px-2 py-0.5 bg-blue-100 rounded-md">' + escapeHtml(feedback.pengajar) + '</span>';
+                htmlContent += '<span class="text-xs text-slate-400">' + escapeHtml(feedback.tanggal) + '</span>';
                 htmlContent += '</div>';
-                htmlContent += '<p class="text-sm text-gray-800 whitespace-pre-wrap">' + escapeHtml(feedback.komentar || '') + '</p>';
+                htmlContent += '<p class="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">' + escapeHtml(feedback.komentar) + '</p>';
                 htmlContent += '</div>';
             });
 
-            htmlContent += '</div>';
-            htmlContent += '</div>';
+            htmlContent += '</div></div>';
         } else {
-            htmlContent += '<div class="mt-4">';
-            htmlContent += '<p class="text-sm text-gray-600 italic">Belum ada feedback dari pengajar untuk hasil quiz ini.</p>';
+            htmlContent += '<div class="mt-4 p-4 bg-slate-50 rounded-xl text-center border border-slate-100">';
+            htmlContent += '<p class="text-sm text-slate-500 italic">Belum ada feedback dari pengajar.</p>';
             htmlContent += '</div>';
         }
 
-        htmlContent += '<p class="mt-4 text-sm text-gray-600">Informasi ini diberikan untuk komunikasi dengan pengajar terkait hasil belajar anak Anda.</p>';
+        htmlContent += '<p class="mt-6 text-xs text-slate-400 text-center">Informasi ini bersifat rahasia antara Wali Murid dan Pengajar.</p>';
         htmlContent += '</div>';
 
         Swal.fire({
-            title: 'Informasi Pengajar',
+            title: 'Info Pengajar',
             html: htmlContent,
-            icon: 'info',
-            width: '700px',
-            confirmButtonColor: '#2563eb',
-            confirmButtonText: 'Tutup'
+            showCloseButton: true,
+            showConfirmButton: false,
+            width: '600px',
+            customClass: {
+                popup: 'rounded-2xl',
+                title: 'text-xl font-bold text-slate-800'
+            }
         });
     }
 
-    // Helper function untuk escape HTML
     function escapeHtml(text) {
         if (!text) return '';
         const map = {
@@ -273,9 +308,7 @@
             '"': '&quot;',
             "'": '&#039;'
         };
-        return String(text).replace(/[&<>"']/g, function(m) {
-            return map[m];
-        });
+        return String(text).replace(/[&<>"']/g, function(m) { return map[m]; });
     }
 </script>
 @endsection

@@ -36,9 +36,16 @@
                         
                         <div class="space-y-4">
                             <div>
-                                <label class="block mb-2 text-sm font-medium text-slate-700">Tanggal Publikasi</label>
-                                <input type="date" name="tanggal" value="{{ $informasi->tanggal->format('Y-m-d') }}" required
+                                <label class="block mb-2 text-sm font-medium text-slate-700">Tanggal Mulai</label>
+                                <input type="date" name="tanggal_mulai" value="{{ $informasi->tanggal_mulai?->format('Y-m-d') }}" required
                                        class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-slate-700">
+                            </div>
+
+                            <div>
+                                <label class="block mb-2 text-sm font-medium text-slate-700">Tanggal Berakhir</label>
+                                <input type="date" name="tanggal_berakhir" value="{{ $informasi->tanggal_berakhir?->format('Y-m-d') }}" required
+                                       class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-slate-700">
+                                <p class="mt-1 text-xs text-slate-500">Informasi akan hilang otomatis setelah tanggal ini.</p>
                             </div>
 
                             <div class="flex items-center p-3 bg-white rounded-lg border border-slate-200">
