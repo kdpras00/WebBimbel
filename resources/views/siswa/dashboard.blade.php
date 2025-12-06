@@ -39,7 +39,7 @@
                             {{ $info->judul }}
                         </h3>
                         <p class="text-slate-600 text-sm leading-relaxed">
-                            {{ $info->konten }}
+                            {{ $info->deskripsi }}
                         </p>
                     </div>
                 </div>

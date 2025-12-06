@@ -187,18 +187,19 @@
                         @forelse($top_students as $index => $point)
                             @php
                                 $rank = $index + 1;
-                                $emoji = match($rank) {
-                                    1 => '💎',
-                                    2 => '🥇',
-                                    3 => '🥈',
-                                    4 => '🥉',
-                                    default => '🏅'
+                                $badge = $point->badge; // Use logic from Point model
+                                $emoji = match($badge) {
+                                    'Diamond' => '💎',
+                                    'Gold' => '🥇',
+                                    'Silver' => '🥈',
+                                    'Bronze' => '🥉',
+                                    default => '🥉'
                                 };
                             @endphp
                             <tr class="bg-white border-b border-gray-200 hover:bg-gray-50">
                                 <td class="px-6 py-4 text-center">
                                     <div class="flex flex-col items-center justify-center">
-                                        <span class="text-3xl" title="Rank {{ $rank }}">{{ $emoji }}</span>
+                                        <span class="text-3xl" title="{{ $badge }}">{{ $emoji }}</span>
                                         <span class="text-xs font-bold text-gray-500 mt-1">#{{ $rank }}</span>
                                     </div>
                                 </td>
