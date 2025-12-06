@@ -110,6 +110,23 @@
             </div>
         </div>
     </div>
+    
+    <!-- Charts Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Student Growth Chart -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 overflow-hidden">
+            <h3 class="text-lg font-bold text-slate-800 mb-4">Pertumbuhan Siswa Baru</h3>
+            <div id="studentGrowthChart" class="-ml-2"></div>
+        </div>
+
+        <!-- Quiz Activity Chart -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+            <h3 class="text-lg font-bold text-slate-800 mb-4">Aktivitas Quiz (30 Hari Terakhir)</h3>
+            <div class="overflow-x-auto pb-2" id="quizChartContainer">
+                <div id="quizActivityChart" class="-ml-2" style="min-width: 800px;"></div>
+            </div>
+        </div>
+    </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Teacher Performance Table -->
@@ -186,3 +203,125 @@
 
 </div>
 @endsection
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Student Growth Chart
+        const growthOptions = {
+            series: [{
+                name: 'Siswa Baru',
+                data: @json($growth_data)
+            }],
+            chart: {
+                type: 'area',
+                height: 350,
+                toolbar: { show: false },
+                fontFamily: 'Inter, sans-serif',
+                parentHeightOffset: 0
+            },
+            grid: {
+                padding: {
+                    top: 0,
+                    right: 0,
+                    bottom: 0,
+                    left: 10
+                }
+            },
+            dataLabels: { enabled: false },
+            stroke: { curve: 'smooth', width: 2 },
+            xaxis: {
+                categories: @json($months),
+                axisBorder: { show: false },
+                axisTicks: { show: false }
+            },
+            yaxis: {
+                show: true,
+                tickAmount: 5
+            },
+            theme: {
+                monochrome: {
+                    enabled: true,
+                    color: '#2563EB', // Blue-600
+                    shadeTo: 'light',
+                    shadeIntensity: 0.65
+                }
+            },
+            fill: {
+                type: 'gradient',
+                gradient: {
+                    shadeIntensity: 1,
+                    opacityFrom: 0.7,
+                    opacityTo: 0.9,
+                    stops: [0, 90, 100]
+                }
+            },
+        };
+
+        const growthChart = new ApexCharts(document.querySelector("#studentGrowthChart"), growthOptions);
+        growthChart.render();
+
+        const activityOptions = {
+            series: [{
+                name: 'Pengerjaan Quiz',
+                data: @json($activity_data)
+            }],
+            chart: {
+                type: 'area',
+                height: 350,
+                toolbar: { show: false }, // Disable toolbar, using native scroll
+                fontFamily: 'Inter, sans-serif',
+                parentHeightOffset: 0,
+                zoom: { enabled: false }
+            },
+            grid: {
+                padding: {
+                    top: 0,
+                    right: 20, // Add padding right for scroll end visibility
+                    bottom: 0,
+                    left: 10
+                }
+            },
+            dataLabels: { enabled: false },
+            stroke: { curve: 'smooth', width: 2 },
+            xaxis: {
+                categories: @json($days),
+                axisBorder: { show: false },
+                axisTicks: { show: false },
+                tooltip: { enabled: false }
+            },
+            fill: {
+                type: 'gradient',
+                gradient: {
+                    shadeIntensity: 1,
+                    opacityFrom: 0.7,
+                    opacityTo: 0.9,
+                    stops: [0, 90, 100]
+                },
+                colors: ['#4F46E5']
+            },
+            theme: {
+                monochrome: {
+                    enabled: true,
+                    color: '#4F46E5',
+                    shadeTo: 'light',
+                    shadeIntensity: 0.65
+                }
+            }
+        };
+
+        const activityChart = new ApexCharts(document.querySelector("#quizActivityChart"), activityOptions);
+        activityChart.render();
+
+        // Scroll to the end of the chart container to show latest data
+        // Using setTimeout to ensure chart is fully rendered and container has width
+        setTimeout(() => {
+            const chartContainer = document.getElementById('quizChartContainer');
+            if (chartContainer) {
+                chartContainer.scrollLeft = chartContainer.scrollWidth;
+            }
+        }, 500);
+    });
+</script>
+@endpush

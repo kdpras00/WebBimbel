@@ -85,6 +85,41 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
-        return view('owner.dashboard', compact('stats', 'teacher_stats', 'top_students'));
+        // 5. Chart Data: Student Growth (Last 6 Months)
+        $student_growth = User::where('role', 'siswa')
+            ->selectRaw('DATE_FORMAT(created_at, "%Y-%m") as month, COUNT(*) as count')
+            ->where('created_at', '>=', now()->subMonths(6))
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get()
+            ->pluck('count', 'month');
+
+        $months = [];
+        $growth_data = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $date = now()->subMonths($i);
+            $key = $date->format('Y-m');
+            $months[] = $date->format('M Y');
+            $growth_data[] = $student_growth[$key] ?? 0;
+        }
+
+        // 6. Chart Data: Quiz Activity (Last 30 Days)
+        $quiz_activity = \App\Models\QuizResult::selectRaw('DATE(created_at) as date, COUNT(*) as count')
+            ->where('created_at', '>=', now()->subDays(30))
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get()
+            ->pluck('count', 'date');
+            
+        $days = [];
+        $activity_data = [];
+        for ($i = 29; $i >= 0; $i--) {
+            $date = now()->subDays($i);
+            $key = $date->format('Y-m-d');
+            $days[] = $date->format('d M');
+            $activity_data[] = $quiz_activity[$key] ?? 0;
+        }
+
+        return view('owner.dashboard', compact('stats', 'teacher_stats', 'top_students', 'months', 'growth_data', 'days', 'activity_data'));
     }
 }

@@ -111,6 +111,10 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->name('siswa.')->grou
 // Owner Routes
 Route::middleware(['auth', 'role:pemilik'])->prefix('owner')->name('owner.')->group(function () {
     Route::get('/dashboard', [OwnerDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/teachers', [\App\Http\Controllers\Owner\TeacherController::class, 'index'])->name('teachers.index');
+    Route::get('/teachers/{id}', [\App\Http\Controllers\Owner\TeacherController::class, 'show'])->name('teachers.show');
+    Route::get('/students', [\App\Http\Controllers\Owner\StudentController::class, 'index'])->name('students.index');
+    Route::get('/students/{id}', [\App\Http\Controllers\Owner\StudentController::class, 'show'])->name('students.show');
 });
 
 // Wali Routes
