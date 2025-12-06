@@ -37,6 +37,7 @@
                 <option value="pengajar" {{ $user->role == 'pengajar' ? 'selected' : '' }}>Pengajar</option>
                 <option value="siswa" {{ $user->role == 'siswa' ? 'selected' : '' }}>Siswa</option>
                 <option value="wali" {{ $user->role == 'wali' ? 'selected' : '' }}>Wali</option>
+                <option value="pemilik" {{ $user->role == 'pemilik' ? 'selected' : '' }}>Owner</option>
             </select>
         </div>
 

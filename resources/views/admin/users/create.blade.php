@@ -40,6 +40,7 @@
                 <option value="pengajar" {{ old('role') == 'pengajar' ? 'selected' : '' }}>Pengajar</option>
                 <option value="siswa" {{ old('role') == 'siswa' ? 'selected' : '' }}>Siswa</option>
                 <option value="wali" {{ old('role') == 'wali' ? 'selected' : '' }}>Wali</option>
+                <option value="pemilik" {{ old('role') == 'pemilik' ? 'selected' : '' }}>Owner</option>
             </select>
             @error('role') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
         </div>
