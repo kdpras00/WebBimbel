@@ -113,8 +113,10 @@ Route::middleware(['auth', 'role:pemilik'])->prefix('owner')->name('owner.')->gr
     Route::get('/dashboard', [OwnerDashboardController::class, 'index'])->name('dashboard');
     Route::get('/teachers', [\App\Http\Controllers\Owner\TeacherController::class, 'index'])->name('teachers.index');
     Route::get('/teachers/{id}', [\App\Http\Controllers\Owner\TeacherController::class, 'show'])->name('teachers.show');
+    Route::get('/quizzes/{id}', [\App\Http\Controllers\Owner\QuizController::class, 'show'])->name('quizzes.show');
     Route::get('/students', [\App\Http\Controllers\Owner\StudentController::class, 'index'])->name('students.index');
     Route::get('/students/{id}', [\App\Http\Controllers\Owner\StudentController::class, 'show'])->name('students.show');
+    Route::get('/students/{id}/pdf', [\App\Http\Controllers\Owner\StudentController::class, 'downloadPDF'])->name('students.pdf');
 });
 
 // Wali Routes

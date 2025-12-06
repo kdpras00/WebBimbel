@@ -7,14 +7,22 @@
     <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-            <div class="flex items-center gap-2 text-blue-100 mb-2">
-                <a href="{{ route('owner.students.index') }}" class="hover:text-white transition-colors">Progress Siswa</a>
-                <span>/</span>
-                <span>Detail</span>
+            <div class="flex items-center gap-2 mb-2">
+                <a href="{{ route('owner.students.index') }}" class="text-slate-400 hover:text-slate-600 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                </a>
+                <h1 class="text-2xl font-bold text-white">Laporan Progress Siswa</h1>
             </div>
-            <h1 class="text-3xl font-bold text-white">{{ $student->name }}</h1>
-            <p class="mt-2 text-blue-100">{{ $student->email }}</p>
+            <p class="text-white ml-7">Statistik dan riwayat pengerjaan quiz</p>
         </div>
+        <a href="{{ route('owner.students.pdf', $student->id) }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm text-sm font-medium">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+            </svg>
+            Download Laporan (PDF)
+        </a>
     </div>
 
     <!-- Stats Grid -->
@@ -57,7 +65,7 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-200">
-                    @forelse($results as $result)
+                    @forelse($student->quizResults as $result)
                         <tr class="hover:bg-slate-50 transition-colors">
                             <td class="px-6 py-4 whitespace-nowrap">{{ $result->created_at->format('d M Y H:i') }}</td>
                             <td class="px-6 py-4">{{ $result->quiz->mapel->nama ?? '-' }}</td>

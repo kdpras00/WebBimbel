@@ -122,7 +122,7 @@
         <!-- Quiz Activity Chart -->
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
             <h3 class="text-lg font-bold text-slate-800 mb-4">Aktivitas Quiz (30 Hari Terakhir)</h3>
-            <div class="overflow-x-auto pb-2" id="quizChartContainer">
+            <div class="overflow-x-auto pb-2 mt-2" id="quizChartContainer">
                 <div id="quizActivityChart" class="-ml-2" style="min-width: 800px;"></div>
             </div>
         </div>
@@ -167,31 +167,62 @@
         </div>
 
         <!-- Top Students Table -->
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-            <div class="p-6 border-b border-slate-100">
-                <h3 class="text-lg font-bold text-slate-800">Siswa Berprestasi</h3>
+        <!-- Top Students Table -->
+        <div class="rounded-lg shadow border border-gray-200" style="background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);">
+            <div class="px-6 py-4 border-b border-gray-200 bg-white rounded-t-lg">
+                <h3 class="text-lg font-bold text-gray-800">Siswa Berprestasi</h3>
+                <p class="text-sm text-gray-500">Berdasarkan total poin (Leaderboard)</p>
             </div>
             <div class="overflow-x-auto">
-                <table class="w-full text-sm text-left text-slate-600">
-                    <thead class="text-xs text-slate-700 uppercase bg-slate-50 border-b border-slate-200">
+                <table class="w-full text-sm text-left text-black">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-100">
                         <tr>
+                            <th scope="col" class="px-6 py-3 text-center">Peringkat</th>
                             <th scope="col" class="px-6 py-3">Nama</th>
-                            <th scope="col" class="px-6 py-3 text-center">Rata-rata Nilai</th>
+                            <th scope="col" class="px-6 py-3 text-center">Total Poin</th>
+                            <th scope="col" class="px-6 py-3 text-center">Detail</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-200">
-                        @forelse($top_students as $student)
-                            <tr class="hover:bg-slate-50 transition-colors">
-                                <td class="px-6 py-4 font-medium text-slate-900">{{ $student->siswa->name }}</td>
+                    <tbody>
+                        @forelse($top_students as $index => $point)
+                            @php
+                                $rank = $index + 1;
+                                $emoji = match($rank) {
+                                    1 => '💎',
+                                    2 => '🥇',
+                                    3 => '🥈',
+                                    4 => '🥉',
+                                    default => '🏅'
+                                };
+                            @endphp
+                            <tr class="bg-white border-b border-gray-200 hover:bg-gray-50">
                                 <td class="px-6 py-4 text-center">
-                                    <span class="px-2 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700">
-                                        {{ number_format($student->avg_nilai, 1) }}
+                                    <div class="flex flex-col items-center justify-center">
+                                        <span class="text-3xl" title="Rank {{ $rank }}">{{ $emoji }}</span>
+                                        <span class="text-xs font-bold text-gray-500 mt-1">#{{ $rank }}</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 font-medium text-black">
+                                    <div class="flex flex-col">
+                                        <span class="text-base font-semibold">{{ $point->user->name }}</span>
+                                        <span class="text-xs text-gray-500">{{ $point->user->email }}</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-center">
+                                    <span class="text-lg font-bold text-gray-800">
+                                        {{ number_format($point->total_poin) }} pts
                                     </span>
+                                </td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="{{ route('owner.students.show', $point->user_id) }}" 
+                                       class="text-blue-600 hover:text-blue-800 font-bold hover:underline">
+                                        Lihat Detail
+                                    </a>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="2" class="px-6 py-8 text-center text-slate-500">Belum ada data siswa</td>
+                                <td colspan="4" class="px-6 py-8 text-center text-gray-500">Belum ada data siswa berprestasi</td>
                             </tr>
                         @endforelse
                     </tbody>

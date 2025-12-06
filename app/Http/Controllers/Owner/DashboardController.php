@@ -73,15 +73,9 @@ class DashboardController extends Controller
             ->sortByDesc('avg_score') // Sort by best performing students
             ->values();
 
-        // 4. Top Students (by Average Score)
-        // Logic: Must be above Global Average AND above standard KKM (e.g. 70)
-        $threshold = max($global_avg_score, 70);
-
-        $top_students = \App\Models\QuizResult::select('siswa_id', \Illuminate\Support\Facades\DB::raw('AVG(nilai) as avg_nilai'))
-            ->with('siswa')
-            ->groupBy('siswa_id')
-            ->having('avg_nilai', '>=', $threshold)
-            ->orderByDesc('avg_nilai')
+        // 4. Top Students (by Points - Matching Leaderboard)
+        $top_students = \App\Models\Point::with('user')
+            ->orderByDesc('total_poin')
             ->take(5)
             ->get();
 

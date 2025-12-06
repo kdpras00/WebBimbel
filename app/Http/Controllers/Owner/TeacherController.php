@@ -55,7 +55,7 @@ class TeacherController extends Controller
                 $q->with('mapel');
                 $q->withCount('results');
                 $q->withAvg('results', 'nilai');
-            }])
+            }, 'kelasPengajar.siswa']) // Eager load students in classes taught by teacher
             ->findOrFail($id);
 
         // Teacher Stats
@@ -75,6 +75,11 @@ class TeacherController extends Controller
 
         $avg_score = $total_results > 0 ? $sum_scores / $total_results : 0;
 
-        return view('owner.teachers.show', compact('teacher', 'avg_score', 'total_results'));
+        // Calculate Total Students Taught (Unique)
+        $total_students_taught = $teacher->kelasPengajar->flatMap(function ($kelas) {
+            return $kelas->siswa;
+        })->unique('id')->count();
+
+        return view('owner.teachers.show', compact('teacher', 'avg_score', 'total_results', 'total_students_taught'));
     }
 }

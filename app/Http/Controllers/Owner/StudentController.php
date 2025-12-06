@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\QuizResult;
 use Illuminate\Http\Request;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 
 class StudentController extends Controller
 {
@@ -34,20 +36,52 @@ class StudentController extends Controller
 
     public function show($id)
     {
-        $student = User::where('role', 'siswa')->findOrFail($id);
-        
-        $results = QuizResult::where('siswa_id', $id)
-            ->with(['quiz.mapel', 'quiz.pengajar'])
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $student = User::with(['quizResults' => function($q) {
+                $q->with(['quiz.mapel', 'quiz.pengajar']);
+                $q->orderBy('created_at', 'desc');
+            }])
+            ->findOrFail($id);
 
         $stats = [
-            'total_quiz' => $results->count(),
-            'avg_score' => $results->avg('nilai') ?? 0,
-            'highest_score' => $results->max('nilai') ?? 0,
-            'lowest_score' => $results->min('nilai') ?? 0,
+            'total_quiz' => $student->quizResults->count(),
+            'avg_score' => $student->quizResults->avg('nilai') ?? 0,
+            'highest_score' => $student->quizResults->max('nilai') ?? 0,
+            'lowest_score' => $student->quizResults->min('nilai') ?? 0,
         ];
 
-        return view('owner.students.show', compact('student', 'results', 'stats'));
+        return view('owner.students.show', compact('student', 'stats'));
+    }
+
+    public function downloadPDF($id)
+    {
+        $student = User::with(['quizResults' => function($q) {
+                $q->with(['quiz.mapel', 'quiz.pengajar']);
+                $q->orderBy('created_at', 'desc');
+            }])
+            ->findOrFail($id);
+
+        $stats = [
+            'total_quiz' => $student->quizResults->count(),
+            'avg_score' => $student->quizResults->avg('nilai') ?? 0,
+            'highest_score' => $student->quizResults->max('nilai') ?? 0,
+            'lowest_score' => $student->quizResults->min('nilai') ?? 0,
+        ];
+
+        // Generate PDF
+        $html = view('owner.students.pdf', compact('student', 'stats'))->render();
+
+        $options = new Options();
+        $options->set('isHtml5ParserEnabled', true);
+        $options->set('isRemoteEnabled', true);
+        $options->set('defaultFont', 'Arial');
+
+        $dompdf = new Dompdf($options);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        $filename = 'Laporan_Progress_' . str_replace(' ', '_', $student->name) . '_' . date('Y-m-d') . '.pdf';
+        
+        return $dompdf->stream($filename);
     }
 }
