@@ -97,7 +97,7 @@
         <button @click="sidebarDesktopOpen = !sidebarDesktopOpen" 
                 class="fixed top-24 z-30 p-2 rounded-r-xl transition-all duration-300 hidden lg:flex items-center justify-center focus:outline-none group"
                 :class="sidebarDesktopOpen ? 'left-64 bg-transparent text-slate-300 hover:bg-white hover:shadow-md hover:text-blue-600' : 'left-0 bg-transparent text-slate-300 hover:bg-white hover:shadow-md hover:text-blue-600 hover:w-10 w-8'">
-            <svg class="w-5 h-5 transition-transform duration-300" :class="sidebarDesktopOpen ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-5 h-5 transition-transform duration-300" :class="!sidebarDesktopOpen ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path>
             </svg>
         </button>
