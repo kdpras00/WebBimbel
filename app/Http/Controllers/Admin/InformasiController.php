@@ -31,7 +31,11 @@ class InformasiController extends Controller
 
         $validated['is_active'] = $request->has('is_active');
 
-        Informasi::create($validated);
+        $informasi = Informasi::create($validated);
+
+        // Notify all users
+        $users = \App\Models\User::all();
+        \Illuminate\Support\Facades\Notification::send($users, new \App\Notifications\NewAnnouncement($informasi));
 
         return redirect()->route('admin.informasi.index')
             ->with('success', 'Informasi berhasil ditambahkan');

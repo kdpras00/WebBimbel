@@ -13,6 +13,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    @stack('styles')
 </head>
 <body class="bg-blue-400 font-sans antialiased text-slate-800" style="font-family: 'Poppins', sans-serif;" 
       x-data="{ 
@@ -53,6 +54,93 @@
                     </a>
                 </div>
                 <div class="flex items-center gap-4">
+                    <!-- Notification Bell -->
+                    <div class="relative" x-data="{
+                        open: false,
+                        unreadCount: 0,
+                        notifications: [],
+                        fetchUnread() {
+                            if (! '{{ Auth::check() }}') return;
+                            fetch('{{ route('notifications.unread-count') }}')
+                                .then(res => res.json())
+                                .then(data => this.unreadCount = data.count)
+                                .catch(err => console.error(err));
+                        },
+                        fetchNotifications() {
+                            if (! '{{ Auth::check() }}') return;
+                            fetch('{{ route('notifications.index') }}')
+                                .then(res => res.json())
+                                .then(data => {
+                                    this.notifications = data;
+                                })
+                                .catch(err => console.error(err));
+                        },
+                        markAsRead(id) {
+                            fetch(`/notifications/${id}/read`, {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                }
+                            });
+                            // Optimistically update UI
+                            this.unreadCount = Math.max(0, this.unreadCount - 1);
+                            this.notifications = this.notifications.map(n => {
+                                if (n.id === id) n.read_at = new Date();
+                                return n;
+                            });
+                        }
+                    }"
+                    x-init="fetchUnread(); setInterval(() => fetchUnread(), 30000)">
+                        <button @click="open = !open; if(open) fetchNotifications()" class="relative p-2 text-slate-400 hover:text-blue-600 transition-colors focus:outline-none mr-2">
+                            <!-- Bell Icon -->
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                            </svg>
+                            <!-- Badge -->
+                            <span x-show="unreadCount > 0" x-text="unreadCount" class="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white transform translate-x-1/4 -translate-y-1/4 bg-red-600 rounded-full border-2 border-white"></span>
+                        </button>
+
+                        <!-- Dropdown -->
+                        <div x-show="open" @click.away="open = false" 
+                             x-transition:enter="transition ease-out duration-200"
+                             x-transition:enter-start="opacity-0 translate-y-2"
+                             x-transition:enter-end="opacity-100 translate-y-0"
+                             x-transition:leave="transition ease-in duration-150"
+                             x-transition:leave-start="opacity-100 translate-y-0"
+                             x-transition:leave-end="opacity-0 translate-y-2"
+                             class="absolute right-0 top-12 z-50 w-80 mt-2 bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden" 
+                             style="display: none;">
+                            <div class="px-4 py-3 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
+                                <span class="text-sm font-semibold text-slate-800">Notifikasi</span>
+                                <button @click="fetchNotifications()" class="text-xs text-blue-600 hover:underline">Refresh</button>
+                            </div>
+                            <div class="max-h-96 overflow-y-auto">
+                                <template x-for="notification in notifications" :key="notification.id">
+                                    <div class="px-4 py-3 border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer group" 
+                                         :class="notification.read_at ? 'opacity-75' : 'bg-blue-50/30'"
+                                         @click="if(!notification.read_at) markAsRead(notification.id); window.location.href = notification.data.link">
+                                        <div class="flex items-start gap-3">
+                                            <div class="flex-shrink-0 mt-1">
+                                                <span class="flex h-2 w-2 rounded-full" :class="notification.read_at ? 'bg-slate-300' : 'bg-blue-600'"></span>
+                                            </div>
+                                            <div class="flex-1 min-w-0">
+                                                <p class="text-sm font-medium text-slate-800 group-hover:text-blue-600 transition-colors" x-text="notification.data.title"></p>
+                                                <p class="text-xs text-slate-500 mt-0.5 line-clamp-2" x-text="notification.data.message"></p>
+                                                <p class="text-[10px] text-slate-400 mt-1.5 uppercase tracking-wide font-medium" x-text="notification.created_at"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+                                <div x-show="notifications.length === 0" class="px-4 py-8 text-center">
+                                    <svg class="w-10 h-10 text-slate-200 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                                    </svg>
+                                    <p class="text-slate-500 text-sm">Tidak ada notifikasi baru</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Profile Dropdown -->
                     <div class="relative">
                         <button type="button" class="flex items-center gap-3 focus:outline-none" id="user-menu-button" aria-expanded="false">

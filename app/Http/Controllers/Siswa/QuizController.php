@@ -433,6 +433,14 @@ class QuizController extends Controller
         // Process gamification
         $this->gamificationService->processQuizResult($result);
 
+        // Notify Student
+        \Illuminate\Support\Facades\Notification::send($user, new \App\Notifications\QuizGraded($result));
+
+        // Notify Wali if exists
+        if ($user->wali) {
+            \Illuminate\Support\Facades\Notification::send($user->wali, new \App\Notifications\QuizGraded($result));
+        }
+
         return redirect()->route('siswa.quiz.result', $result->id)
             ->with('success', 'Quiz berhasil disubmit!');
     }

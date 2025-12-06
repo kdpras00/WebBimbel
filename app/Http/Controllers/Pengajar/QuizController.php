@@ -69,6 +69,11 @@ class QuizController extends Controller
 
         $quiz = Quiz::create($validated);
 
+        // Notify students in the class
+        if ($mapel->kelas && $mapel->kelas->siswa->count() > 0) {
+            \Illuminate\Support\Facades\Notification::send($mapel->kelas->siswa, new \App\Notifications\NewContent($quiz, 'quiz'));
+        }
+
         return redirect()->route('pengajar.quiz.edit', $quiz->id)
             ->with('success', 'Quiz berhasil dibuat. Silakan tambahkan soal.');
     }

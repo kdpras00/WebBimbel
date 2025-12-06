@@ -109,7 +109,12 @@ class MateriController extends Controller
             }
         }
 
-        Materi::create($validated);
+        $materi = Materi::create($validated);
+
+        // Notify students in the class
+        if ($mapel->kelas && $mapel->kelas->siswa->count() > 0) {
+            \Illuminate\Support\Facades\Notification::send($mapel->kelas->siswa, new \App\Notifications\NewContent($materi, 'materi'));
+        }
 
         return redirect()->route('pengajar.materi.index')
             ->with('success', 'Materi berhasil ditambahkan');

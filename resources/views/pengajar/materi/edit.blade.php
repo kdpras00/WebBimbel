@@ -86,8 +86,9 @@
 
         <div class="mb-4" id="textInput">
             <label class="block mb-2 text-sm font-medium text-black">Konten Teks</label>
-            <textarea name="konten" rows="10"
-                      class="bg-white border border-gray-300 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">{{ old('konten', $materi->konten) }}</textarea>
+            <!-- Create the editor container -->
+            <div id="editor" class="bg-white" style="height: 300px;"></div>
+            <input type="hidden" name="konten" id="konten">
         </div>
 
         <div class="mb-4">
@@ -347,5 +348,68 @@ if (form) {
     });
 }
 </script>
+</script>
+
+@push('styles')
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+<style>
+    .ql-toolbar.ql-snow {
+        border-top-left-radius: 0.5rem;
+        border-top-right-radius: 0.5rem;
+        border-color: #d1d5db;
+        background-color: #f9fafb;
+    }
+    .ql-container.ql-snow {
+        border-bottom-left-radius: 0.5rem;
+        border-bottom-right-radius: 0.5rem;
+        border-color: #d1d5db;
+        background-color: white;
+        font-family: 'Poppins', sans-serif;
+        font-size: 1rem;
+    }
+</style>
+@endpush
+
+@push('scripts')
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var quill = new Quill('#editor', {
+            theme: 'snow',
+            placeholder: 'Tulis materi lengkap di sini...',
+            modules: {
+                toolbar: [
+                    [{ 'header': [1, 2, 3, false] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    ['blockquote', 'code-block'],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    [{ 'script': 'sub'}, { 'script': 'super' }],
+                    [{ 'indent': '-1'}, { 'indent': '+1' }],
+                    [{ 'color': [] }, { 'background': [] }],
+                    [{ 'align': [] }],
+                    ['link', 'image'],
+                    ['clean']
+                ]
+            }
+        });
+
+        // Set initial content safely
+        var oldContent = {!! json_encode(old('konten', $materi->konten)) !!};
+        if (oldContent) {
+            quill.root.innerHTML = oldContent;
+        }
+
+        // Update hidden input on submit
+        var form = document.querySelector('form');
+        form.addEventListener('submit', function() {
+            var konten = document.querySelector('input[name=konten]');
+            // Only update if using text mode
+            if (document.getElementById('tipe').value === 'teks') {
+                konten.value = quill.root.innerHTML;
+            }
+        });
+    });
+</script>
+@endpush
 @endsection
 
