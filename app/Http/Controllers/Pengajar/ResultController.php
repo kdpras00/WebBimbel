@@ -22,6 +22,7 @@ class ResultController extends Controller
         $results = QuizResult::whereHas('quiz', function($query) use ($user) {
             $query->where('pengajar_id', $user->id);
         })
+        ->doesntHave('feedback')
         ->with(['quiz.mapel', 'siswa'])
         ->orderBy('created_at', 'desc')
         ->paginate(15);

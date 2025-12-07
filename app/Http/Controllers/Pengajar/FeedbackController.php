@@ -35,6 +35,7 @@ class FeedbackController extends Controller
         $results = QuizResult::whereHas('quiz', function($query) use ($user) {
             $query->where('pengajar_id', $user->id);
         })
+        ->doesntHave('feedback')
         ->with(['siswa', 'quiz'])
         ->orderBy('created_at', 'desc')
         ->get();
