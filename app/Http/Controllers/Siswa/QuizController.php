@@ -342,6 +342,19 @@ class QuizController extends Controller
                 ->first();
         }
 
+        // Check if session is already submitted first to prevent double submission
+        if ($session && $session->status === 'submitted') {
+            $latestResult = QuizResult::where('quiz_id', $quiz->id)
+                ->where('siswa_id', $user->id)
+                ->latest()
+                ->first();
+            
+            if ($latestResult) {
+                return redirect()->route('siswa.quiz.result', $latestResult->id)
+                    ->with('warning', 'Quiz sudah disubmit sebelumnya.');
+            }
+        }
+
         $endTime = now();
 
         $jawaban = $request->input('jawaban', []);
@@ -365,6 +378,23 @@ class QuizController extends Controller
                 }
             } else {
                 $convertedJawaban[$questionId] = $userAnswer;
+            }
+        }
+
+        // Calculate Score by comparing answers
+        foreach ($quiz->questions as $question) {
+            if (isset($convertedJawaban[$question->id])) {
+                $userAnswer = $convertedJawaban[$question->id];
+                
+                if ($question->tipe == 'pilihan_ganda') {
+                    // Check if answer matches correct answer
+                    if ($userAnswer == $question->jawaban_benar) {
+                        $jawabanBenar++;
+                    }
+                } 
+                // For essay, we currently don't auto-grade, or it might be manual. 
+                // Assuming essay questions don't contribute to auto-calculated 'jawabanBenar' unless specified.
+                // If there were boolean/true-false questions, they would likely fall under pilihan_ganda logic or similar.
             }
         }
 
