@@ -29,11 +29,11 @@
             <label class="block mb-2 text-sm font-medium text-black">Jurusan yang Tersedia</label>
             <div class="space-y-2">
                 <label class="flex items-center">
-                    <input type="checkbox" name="jurusan[]" value="IPA" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                    <input type="radio" name="jurusan" value="IPA" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500">
                     <span class="ml-2 text-sm text-black">IPA</span>
                 </label>
                 <label class="flex items-center">
-                    <input type="checkbox" name="jurusan[]" value="IPS" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                    <input type="radio" name="jurusan" value="IPS" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500">
                     <span class="ml-2 text-sm text-black">IPS</span>
                 </label>
             </div>
@@ -61,7 +61,8 @@ document.getElementById('kelasNumber').addEventListener('change', function() {
     
     // Set nama kelas
     if (kelasNumber) {
-        namaKelas.value = 'Kelas ' + kelasNumber;
+        let name = 'Kelas ' + kelasNumber;
+        namaKelas.value = name;
     } else {
         namaKelas.value = '';
     }
@@ -71,10 +72,13 @@ document.getElementById('kelasNumber').addEventListener('change', function() {
         jurusanField.style.display = 'block';
     } else {
         jurusanField.style.display = 'none';
-        // Uncheck all jurusan checkboxes
-        document.querySelectorAll('input[name="jurusan[]"]').forEach(cb => cb.checked = false);
+        // Uncheck all jurusan radios
+        document.querySelectorAll('input[name="jurusan"]').forEach(rb => rb.checked = false);
     }
 });
+
+
+
 
 // Trigger on load if old value exists
 if (document.getElementById('kelasNumber').value) {

@@ -74,12 +74,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="bg-slate-50 px-6 py-3 border-t border-slate-100 flex justify-between items-center">
-                            <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Bobot Soal</span>
-                            <span class="px-2.5 py-1 rounded-md bg-white border border-slate-200 text-slate-600 text-xs font-bold shadow-sm">
-                                {{ $question->skor }} Poin
-                            </span>
-                        </div>
+
                     </div>
                 @endforeach
             </div>

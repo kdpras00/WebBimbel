@@ -147,7 +147,6 @@ class QuizController extends Controller
             'tipe' => 'required|in:pilihan_ganda,essay',
             'pilihan' => 'required_if:tipe,pilihan_ganda|array',
             'jawaban_benar' => 'required|string',
-            'skor' => 'required|integer|min:1',
             'urutan' => 'nullable|integer',
         ]);
 

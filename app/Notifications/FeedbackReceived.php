@@ -7,18 +7,18 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class QuizGraded extends Notification
+class FeedbackReceived extends Notification
 {
     use Queueable;
 
-    public $result;
+    public $feedback;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct($result)
+    public function __construct($feedback)
     {
-        $this->result = $result;
+        $this->feedback = $feedback;
     }
 
     /**
@@ -39,11 +39,13 @@ class QuizGraded extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            'title' => 'Nilai Quiz Keluar',
-            'message' => 'Nilai untuk quiz "' . $this->result->quiz->judul . '" sudah tersedia.',
-            'link' => $notifiable->role == 'siswa' ? route('siswa.quiz.result', $this->result->id) : route('wali.nilai'),
-            'type' => 'grade',
-            'grade' => $this->result->nilai, // Optional extra data
+            'title' => 'Feedback Baru',
+            'message' => 'Pengajar ' . $this->feedback->pengajar->name . ' memberikan komentar terbaru.',
+            'link' => $notifiable->role == 'siswa' 
+                ? route('siswa.quiz.result', $this->feedback->quiz_result_id) 
+                : route('wali.nilai'),
+            'type' => 'feedback',
+            'content' => \Illuminate\Support\Str::limit($this->feedback->komentar, 50),
             'created_at' => now(),
         ];
     }

@@ -23,21 +23,51 @@ class KelasController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nama' => 'required|string|max:255|unique:kelas,nama',
-            'deskripsi' => 'nullable|string',
             'kelas_number' => 'nullable|integer|min:1|max:12',
-            'jurusan' => 'nullable|array',
-            'jurusan.*' => 'in:IPA,IPS',
-        ], [
-            'nama.unique' => 'class name already exist',
+            'jurusan' => 'nullable|string|in:IPA,IPS',
+            'deskripsi' => 'nullable|string',
         ]);
 
-        // Jika kelas_number ada, gunakan itu untuk set nama
         if ($request->filled('kelas_number')) {
-            $validated['nama'] = 'Kelas ' . $request->kelas_number;
-        }
+            $baseName = 'Kelas ' . $request->kelas_number;
+            
+            // Handle Jurusan
+            if ($request->filled('jurusan')) {
+                // Check if exists (Name + Jurusan)
+                if (Kelas::where('nama', $baseName)->where('jurusan', $request->jurusan)->exists()) {
+                    return back()->withErrors(['nama' => "$baseName jurusan {$request->jurusan} sudah ada!"])->withInput();
+                }
 
-        Kelas::create($validated);
+                Kelas::create([
+                    'nama' => $baseName,
+                    'jurusan' => $request->jurusan,
+                    'deskripsi' => $request->deskripsi
+                ]);
+            } else {
+                // No jurusan
+                 if (Kelas::where('nama', $baseName)->whereNull('jurusan')->exists()) {
+                    return back()->withErrors(['nama' => "$baseName sudah ada!"])->withInput();
+                }
+                
+                Kelas::create([
+                    'nama' => $baseName,
+                    'jurusan' => null,
+                    'deskripsi' => $request->deskripsi
+                ]);
+            }
+        } else {
+             // Manual name input fallback
+             $request->validate([
+                'nama' => 'required|string|max:255',
+             ]);
+             
+             // Check manual duplicate
+             if (Kelas::where('nama', $request->nama)->exists()) {
+                 return back()->withErrors(['nama' => "Nama kelas sudah ada"])->withInput();
+             }
+             
+             Kelas::create($request->all());
+        }
 
         return redirect()->route('admin.kelas.index')
             ->with('success', 'Kelas berhasil ditambahkan');
@@ -63,21 +93,55 @@ class KelasController extends Controller
         $kelas = Kelas::findOrFail($id);
 
         $validated = $request->validate([
-            'nama' => 'required|string|max:255|unique:kelas,nama,' . $id,
-            'deskripsi' => 'nullable|string',
             'kelas_number' => 'nullable|integer|min:1|max:12',
-            'jurusan' => 'nullable|array',
-            'jurusan.*' => 'in:IPA,IPS',
-        ], [
-            'nama.unique' => 'class name already exist',
+            'jurusan' => 'nullable|string|in:IPA,IPS',
+            'deskripsi' => 'nullable|string',
         ]);
 
-        // Jika kelas_number ada, gunakan itu untuk set nama
+        $dataToUpdate = [
+            'deskripsi' => $request->deskripsi
+        ];
+
+        // Jika kelas_number ada, kita update nama dan jurusan
         if ($request->filled('kelas_number')) {
-            $validated['nama'] = 'Kelas ' . $request->kelas_number;
+            $baseName = 'Kelas ' . $request->kelas_number;
+            $jurusan = null;
+
+            if ($request->filled('jurusan')) {
+                $jurusan = $request->jurusan;
+            }
+
+            // Check duplicate name + jurusan excluding current class
+            $query = Kelas::where('nama', $baseName)->where('id', '!=', $id);
+            
+            if ($jurusan) {
+                $query->where('jurusan', $jurusan);
+            } else {
+                $query->whereNull('jurusan');
+            }
+
+            if ($query->exists()) {
+                 $msg = $jurusan ? "$baseName jurusan $jurusan" : $baseName;
+                 return back()->withErrors(['nama' => "Kelas $msg sudah ada!"])->withInput();
+            }
+
+            $dataToUpdate['nama'] = $baseName;
+            $dataToUpdate['jurusan'] = $jurusan;
+        } else {
+            // Manual name update if needed
+            if ($request->filled('nama')) {
+                 $request->validate([
+                    'nama' => 'required|string|max:255',
+                 ]);
+                 // Check unique
+                 if (Kelas::where('nama', $request->nama)->where('id', '!=', $id)->exists()) {
+                     return back()->withErrors(['nama' => "Nama kelas sudah ada"])->withInput();
+                 }
+                 $dataToUpdate['nama'] = $request->nama;
+            }
         }
 
-        $kelas->update($validated);
+        $kelas->update($dataToUpdate);
 
         return redirect()->route('admin.kelas.index')
             ->with('success', 'Kelas berhasil diupdate');

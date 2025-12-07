@@ -73,8 +73,6 @@ class UserSeeder extends Seeder
         // Note: Assign siswa to kelas dilakukan di KelasSiswaSeeder dengan jurusan
 
         // Create points for siswa
-        Point::create(['user_id' => $siswa1->id, 'total_poin' => 50]);
-        Point::create(['user_id' => $siswa2->id, 'total_poin' => 75]);
-        Point::create(['user_id' => $siswa3->id, 'total_poin' => 30]);
+
     }
 }

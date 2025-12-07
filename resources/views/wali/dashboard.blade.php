@@ -60,6 +60,7 @@
                 ];
                 $color = $colors[$index % count($colors)];
             @endphp
+            @if($stat['total_quiz'] > 0)
             <div class="group relative overflow-hidden rounded-2xl bg-white shadow-sm border border-slate-100 hover:shadow-md transition-all duration-300">
                 <!-- Content -->
                 <div class="relative p-6">
@@ -121,6 +122,7 @@
                     </div>
                 </div>
             </div>
+            @endif
         @endforeach
     </div>
 @else

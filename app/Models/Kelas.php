@@ -13,6 +13,7 @@ class Kelas extends Model
     protected $fillable = [
         'nama',
         'deskripsi',
+        'jurusan',
     ];
 
     public function mapel(): HasMany

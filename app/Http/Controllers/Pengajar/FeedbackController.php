@@ -52,7 +52,18 @@ class FeedbackController extends Controller
 
         $validated['pengajar_id'] = Auth::id();
 
-        Feedback::create($validated);
+        $feedback = Feedback::create($validated);
+
+        // Notify Student
+        $siswa = \App\Models\User::find($validated['siswa_id']);
+        if ($siswa) {
+            $siswa->notify(new \App\Notifications\FeedbackReceived($feedback));
+            
+            // Notify Wali if exists
+            if ($siswa->wali) {
+                $siswa->wali->notify(new \App\Notifications\FeedbackReceived($feedback));
+            }
+        }
 
         return redirect()->route('pengajar.feedback.index')
             ->with('success', 'Feedback berhasil diberikan');

@@ -90,9 +90,7 @@
                                 {{ $question->pertanyaan }}
                             </h3>
                         </div>
-                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-indigo-100 text-indigo-700">
-                            {{ $question->skor }} poin
-                        </span>
+
                     </div>
                 </div>
 

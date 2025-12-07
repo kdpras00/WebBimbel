@@ -16,6 +16,7 @@
             <thead class="text-xs text-gray-700 uppercase bg-gray-100">
                 <tr>
                     <th scope="col" class="px-6 py-3">Nama</th>
+                    <th scope="col" class="px-6 py-3">Jurusan</th>
                     <th scope="col" class="px-6 py-3">Deskripsi</th>
                     <th scope="col" class="px-6 py-3">Siswa</th>
                     <th scope="col" class="px-6 py-3">Pengajar</th>
@@ -26,6 +27,7 @@
                 @forelse($kelas as $k)
                     <tr class="bg-white border-b border-gray-200">
                         <td class="px-6 py-4 font-medium text-black">{{ $k->nama }}</td>
+                        <td class="px-6 py-4 text-black">{{ $k->jurusan ?? '-' }}</td>
                         <td class="px-6 py-4 text-black">{{ $k->deskripsi }}</td>
                         <td class="px-6 py-4 text-black">{{ $k->siswa_count }}</td>
                         <td class="px-6 py-4 text-black">{{ $k->pengajar_count }}</td>

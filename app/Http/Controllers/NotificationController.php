@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 class NotificationController extends Controller
+{
     public function unreadCount()
     {
         return response()->json([
@@ -21,7 +22,11 @@ class NotificationController extends Controller
             ->map(function ($n) {
                 return [
                     'id' => $n->id,
-                    'data' => $n->data,
+                    'data' => array_merge($n->data, [
+                        'link' => \Illuminate\Support\Facades\Auth::user()->role == 'wali'
+                            ? route('wali.nilai')
+                            : ($n->data['link'] ?? '#')
+                    ]),
                     'read_at' => $n->read_at,
                     'created_at' => $n->created_at->diffForHumans(),
                 ];
@@ -49,3 +54,4 @@ class NotificationController extends Controller
         \Illuminate\Support\Facades\Auth::user()->unreadNotifications->markAsRead();
         return response()->json(['success' => true]);
     }
+}

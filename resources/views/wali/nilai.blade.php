@@ -258,7 +258,7 @@
         let htmlContent = '<div class="text-left">';
         htmlContent += '<div class="mb-4 pb-4 border-b border-gray-100">';
         htmlContent += '<p class="mb-2 text-slate-700"><strong>Nama:</strong> ' + escapeHtml(name) + '</p>';
-        htmlContent += '<p class="mb-2 text-slate-700"><strong>Email:</strong> ' + escapeHtml(email) + '</p>';
+
         htmlContent += '</div>';
 
         if (feedbackData.length > 0) {
