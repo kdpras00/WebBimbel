@@ -510,11 +510,13 @@ class QuizController extends Controller
         $result = QuizResult::with(['quiz.questions', 'quiz.mapel'])->findOrFail($id);
         
         // Check if the result belongs to the authenticated user
-        if ($result->siswa_id !== Auth::id()) {
+        if ($result->siswa_id != Auth::id()) {
             \Log::warning('Unauthorized quiz result access attempt', [
                 'result_id' => $id,
                 'result_siswa_id' => $result->siswa_id,
+                'result_siswa_id_type' => gettype($result->siswa_id),
                 'auth_user_id' => Auth::id(),
+                'auth_user_id_type' => gettype(Auth::id()),
                 'auth_user_role' => Auth::user()->role ?? 'unknown'
             ]);
             
