@@ -331,6 +331,18 @@ class QuizController extends Controller
         $quiz = Quiz::with('questions')->findOrFail($id);
         $user = Auth::user();
         
+        // Ensure user is authenticated and has siswa role
+        if (!$user || $user->role !== 'siswa') {
+            \Log::error('Non-siswa user attempted to submit quiz', [
+                'user_id' => $user ? $user->id : null,
+                'user_role' => $user ? $user->role : null,
+                'quiz_id' => $id
+            ]);
+            
+            return redirect()->route('login')
+                ->with('error', 'Hanya siswa yang dapat mengumpulkan jawaban quiz.');
+        }
+        
         $session = null;
         $remainingSeconds = null;
         $waktuPengerjaan = null;
@@ -447,6 +459,13 @@ class QuizController extends Controller
         $questionOrder = $session ? $session->question_order : null;
         $optionMapping = $session ? $session->option_mapping : null;
 
+        \Log::info('Creating QuizResult', [
+            'quiz_id' => $quiz->id,
+            'siswa_id' => $user->id,
+            'nilai' => round($nilai),
+            'attempt' => $attemptNumber
+        ]);
+
         $result = QuizResult::create([
             'quiz_id' => $quiz->id,
             'siswa_id' => $user->id,
@@ -458,6 +477,11 @@ class QuizController extends Controller
             'jawaban' => $convertedJawaban, // Save converted answers (original keys)
             'question_order' => $questionOrder, // Save randomized question order
             'option_mapping' => $optionMapping, // Save option mapping for display
+        ]);
+
+        \Log::info('QuizResult created successfully', [
+            'result_id' => $result->id,
+            'siswa_id' => $result->siswa_id
         ]);
 
         // Process gamification
@@ -477,10 +501,46 @@ class QuizController extends Controller
 
     public function result($id)
     {
-        $result = QuizResult::with(['quiz.questions', 'quiz.mapel'])->findOrFail($id);
+        // Ensure user is authenticated
+        if (!Auth::check()) {
+            \Log::error('Quiz result access - User not authenticated', [
+                'result_id' => $id,
+                'url' => request()->fullUrl()
+            ]);
+            
+            return redirect()->route('login')
+                ->with('error', 'Silakan login terlebih dahulu untuk melihat hasil quiz.');
+        }
+
+        $result = QuizResult::with(['quiz.questions', 'quiz.mapel', 'siswa'])->findOrFail($id);
         
-        if ($result->siswa_id !== Auth::id()) {
-            abort(403);
+        $authUser = Auth::user();
+        
+        // Enhanced logging for debugging
+        \Log::info('Quiz result access attempt', [
+            'result_id' => $id,
+            'result_siswa_id' => $result->siswa_id,
+            'result_siswa_name' => $result->siswa->name ?? 'N/A',
+            'auth_user_id' => $authUser->id,
+            'auth_user_name' => $authUser->name,
+            'auth_user_email' => $authUser->email,
+            'auth_user_role' => $authUser->role,
+            'ids_match' => ($result->siswa_id === $authUser->id),
+            'url' => request()->fullUrl()
+        ]);
+        
+        // Check if the result belongs to the authenticated user
+        if ($result->siswa_id !== $authUser->id) {
+            \Log::warning('Unauthorized quiz result access attempt', [
+                'result_id' => $id,
+                'result_siswa_id' => $result->siswa_id,
+                'result_siswa_name' => $result->siswa->name ?? 'N/A',
+                'auth_user_id' => $authUser->id,
+                'auth_user_name' => $authUser->name,
+                'auth_user_role' => $authUser->role
+            ]);
+            
+            abort(403, 'Anda tidak memiliki akses untuk melihat hasil quiz ini.');
         }
 
         // Apply randomization if exists
