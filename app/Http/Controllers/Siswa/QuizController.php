@@ -104,7 +104,7 @@ class QuizController extends Controller
             ->where('siswa_id', $user->id)
             ->count();
 
-        // Maksimal 3 kali attempt
+        // Maksimal 3 kali attempt - jika sudah 3x, redirect ke hasil terakhir
         if ($attemptCount >= 3) {
             $latestResult = QuizResult::where('quiz_id', $id)
                 ->where('siswa_id', $user->id)
@@ -112,7 +112,7 @@ class QuizController extends Controller
                 ->first();
             
             return redirect()->route('siswa.quiz.result', $latestResult->id)
-                ->with('error', 'Anda sudah mencapai batas maksimal 3 kali attempt untuk quiz ini.');
+                ->with('info', 'Anda sudah menyelesaikan quiz ini sebanyak 3 kali. Berikut adalah hasil terakhir Anda.');
         }
 
         // Check if there's an active session

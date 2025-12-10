@@ -41,7 +41,7 @@ class QuizGraded extends Notification
         return [
             'title' => 'Nilai Quiz Keluar',
             'message' => 'Nilai untuk quiz "' . $this->result->quiz->judul . '" sudah tersedia.',
-            'link' => $notifiable->role == 'siswa' ? url(route('siswa.quiz.result', $this->result->id, false)) : url(route('wali.nilai', [], false)),
+            'link' => $notifiable->role == 'siswa' ? route('siswa.quiz.result', $this->result->id) : route('wali.nilai'),
             'type' => 'grade',
             'grade' => $this->result->nilai, // Optional extra data
             'created_at' => now(),
