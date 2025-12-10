@@ -41,7 +41,7 @@ class NewAnnouncement extends Notification
         return [
             'title' => 'Pengumuman Baru',
             'message' => $this->info->judul,
-            'link' => route('dashboard'), // Simplified link
+            'link' => url(route('dashboard', [], false)), // Simplified link
             'type' => 'announcement',
             'created_at' => now(),
         ];

@@ -503,41 +503,19 @@ class QuizController extends Controller
     {
         // Ensure user is authenticated
         if (!Auth::check()) {
-            \Log::error('Quiz result access - User not authenticated', [
-                'result_id' => $id,
-                'url' => request()->fullUrl()
-            ]);
-            
             return redirect()->route('login')
                 ->with('error', 'Silakan login terlebih dahulu untuk melihat hasil quiz.');
         }
 
-        $result = QuizResult::with(['quiz.questions', 'quiz.mapel', 'siswa'])->findOrFail($id);
-        
-        $authUser = Auth::user();
-        
-        // Enhanced logging for debugging
-        \Log::info('Quiz result access attempt', [
-            'result_id' => $id,
-            'result_siswa_id' => $result->siswa_id,
-            'result_siswa_name' => $result->siswa->name ?? 'N/A',
-            'auth_user_id' => $authUser->id,
-            'auth_user_name' => $authUser->name,
-            'auth_user_email' => $authUser->email,
-            'auth_user_role' => $authUser->role,
-            'ids_match' => ($result->siswa_id === $authUser->id),
-            'url' => request()->fullUrl()
-        ]);
+        $result = QuizResult::with(['quiz.questions', 'quiz.mapel'])->findOrFail($id);
         
         // Check if the result belongs to the authenticated user
-        if ($result->siswa_id !== $authUser->id) {
+        if ($result->siswa_id !== Auth::id()) {
             \Log::warning('Unauthorized quiz result access attempt', [
                 'result_id' => $id,
                 'result_siswa_id' => $result->siswa_id,
-                'result_siswa_name' => $result->siswa->name ?? 'N/A',
-                'auth_user_id' => $authUser->id,
-                'auth_user_name' => $authUser->name,
-                'auth_user_role' => $authUser->role
+                'auth_user_id' => Auth::id(),
+                'auth_user_role' => Auth::user()->role ?? 'unknown'
             ]);
             
             abort(403, 'Anda tidak memiliki akses untuk melihat hasil quiz ini.');

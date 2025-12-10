@@ -42,8 +42,8 @@ class NewContent extends Notification
     {
         $title = $this->type === 'quiz' ? 'Quiz Baru Tersedia' : 'Materi Baru Diupload';
         $link = $this->type === 'quiz' 
-            ? route('siswa.quiz.show', $this->content->id) 
-            : route('siswa.materi.index'); // Adjust if detail view exists
+            ? url(route('siswa.quiz.show', $this->content->id, false)) 
+            : url(route('siswa.materi.index', [], false)); // Adjust if detail view exists
 
         return [
             'title' => $title,
