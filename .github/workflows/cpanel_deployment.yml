@@ -21,39 +21,29 @@ jobs:
           key: ${{ secrets.SSH_KEY_PRIVATE }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           port: 2223
-          script_stop: false
           script: |
-            # 1. Pastikan folder tujuan ada
-            mkdir -p ~/public_html/domains/bimbelhikari.my.id
-            cd ~/public_html/domains/bimbelhikari.my.id || exit 1
+            cd ~/public_html/domains/bimbelhikari.my.id
 
-            # 2. Inisialisasi Git jika belum ada
-            if [ ! -d ".git" ]; then
-              echo "🚀 Folder kosong atau bukan Git repo. Melakukan Clone..."
-              git clone https://github.com/${{ github.repository }}.git .
-            else
-              echo "📦 Folder repo ditemukan. Melakukan Pull..."
-              git fetch origin
-              git reset --hard origin/main
-            fi
+            echo "📦 Pull latest code from GitHub..."
+            git fetch origin
+            git reset --hard origin/main
 
-            # 3. Install Dependencies
-            if [ -f "composer.json" ]; then
-              echo "🧰 Install Composer..."
-              composer install --no-dev --optimize-autoloader || php ~/bin/composer.phar install --no-dev --optimize-autoloader
-            fi
+            echo "🧰 Install Composer dependencies..."
+            ~/bin/composer install --no-dev --optimize-autoloader
 
-            echo "📦 Install NPM..."
-            # Gunakan npm langsung karena server sudah pakai v24.14.1
-            npm install && npm run build:filament
+            echo "📦 Install npm dependencies..."
+            ~/.nvm/versions/node/v24.3.0/bin/npm ci
 
-            # 4. Optimasi Laravel
-            if [ -f "artisan" ]; then
-              echo "🚀 Running Artisan commands..."
-              php artisan migrate --force
-              php artisan config:cache
-              php artisan route:cache
-              php artisan view:cache
-            fi
+            echo "🧩 Build Filament assets..."
+            ~/.nvm/versions/node/v24.3.0/bin/npm run build:filament
 
-            echo "✅ Deploy selesai!"
+            echo "🚀 Run Laravel optimizations..."
+            php artisan migrate --force
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+
+            echo "✅ Deploy finished!"
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
