@@ -29,7 +29,7 @@ jobs:
             git reset --hard origin/main
 
             echo "🧰 Install Composer dependencies..."
-            ~/bin/composer install --no-dev --optimize-autoloader
+            ~/bin/composer install --no-dev --optimize-autoloader --ignore-platform-reqs
 
             echo "📦 Install npm dependencies..."
             ~/.nvm/versions/node/v24.3.0/bin/npm ci
