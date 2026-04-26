@@ -21,6 +21,9 @@ jobs:
           key: ${{ secrets.SSH_KEY_PRIVATE }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           port: 2223
+          timeout: 60s
+          command_timeout: 30m
+          debug: true
           script: |
             cd ~/public_html/domains/bimbelhikari.my.id
 
