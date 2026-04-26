@@ -17,11 +17,12 @@ jobs:
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY_PRIVATE }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
           port: 2223
           script: |
-            cd ~/public_html/bimbelhikari.my.id
+            cd ~/public_html/domains/bimbelhikari.my.id/.my.id
 
             echo "📦 Pull latest code from GitHub..."
             git fetch origin
@@ -33,8 +34,8 @@ jobs:
             echo "📦 Install npm dependencies..."
             ~/.nvm/versions/node/v24.3.0/bin/npm ci
 
-            echo "🧩 Build Assets..."
-            ~/.nvm/versions/node/v24.3.0/bin/npm run build
+            echo "🧩 Build Filament assets..."
+            ~/.nvm/versions/node/v24.3.0/bin/npm run build:filament
 
             echo "🚀 Run Laravel optimizations..."
             php artisan migrate --force
@@ -43,3 +44,6 @@ jobs:
             php artisan view:cache
 
             echo "✅ Deploy finished!"
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
