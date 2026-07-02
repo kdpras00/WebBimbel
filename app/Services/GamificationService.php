@@ -14,7 +14,7 @@ class GamificationService
     public function calculatePoints(QuizResult $result): int
     {
         $nilai = $result->nilai;
-        $points = 10; // Poin dasar partisipasi (Participation Reward)
+        $points = 0; // Poin dari aturan gamifikasi
         
         // Get gamification settings
         $settings = GamificationSetting::orderBy('nilai_min', 'desc')->get();

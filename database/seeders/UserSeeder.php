@@ -17,14 +17,14 @@ class UserSeeder extends Seeder
     {
         // Create Pengajar
         $pengajar1 = User::create([
-            'name' => 'Budi Santoso',
+            'name' => 'adi',
             'email' => 'pengajar1@bimbel.com',
             'password' => Hash::make('password'),
             'role' => 'pengajar',
         ]);
 
         $pengajar2 = User::create([
-            'name' => 'Siti Nurhaliza',
+            'name' => 'ratih',
             'email' => 'pengajar2@bimbel.com',
             'password' => Hash::make('password'),
             'role' => 'pengajar',
@@ -32,14 +32,14 @@ class UserSeeder extends Seeder
 
         // Create Wali
         $wali1 = User::create([
-            'name' => 'Ahmad Wijaya',
+            'name' => 'nathan',
             'email' => 'wali1@bimbel.com',
             'password' => Hash::make('password'),
             'role' => 'wali',
         ]);
 
         $wali2 = User::create([
-            'name' => 'Sari Dewi',
+            'name' => 'andri',
             'email' => 'wali2@bimbel.com',
             'password' => Hash::make('password'),
             'role' => 'wali',
@@ -47,7 +47,7 @@ class UserSeeder extends Seeder
 
         // Create Siswa
         $siswa1 = User::create([
-            'name' => 'Andi Pratama',
+            'name' => 'andin',
             'email' => 'siswa1@bimbel.com',
             'password' => Hash::make('password'),
             'role' => 'siswa',
@@ -55,7 +55,7 @@ class UserSeeder extends Seeder
         ]);
 
         $siswa2 = User::create([
-            'name' => 'Dewi Lestari',
+            'name' => 'galang',
             'email' => 'siswa2@bimbel.com',
             'password' => Hash::make('password'),
             'role' => 'siswa',
@@ -70,9 +70,7 @@ class UserSeeder extends Seeder
             'wali_id' => $wali1->id,
         ]);
 
-        // Note: Assign siswa to kelas dilakukan di KelasSiswaSeeder dengan jurusan
 
-        // Create points for siswa
 
     }
 }

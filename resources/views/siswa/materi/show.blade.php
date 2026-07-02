@@ -24,7 +24,7 @@
 
     @if($materi->tipe == 'teks')
         <div class="prose max-w-none">
-            {!! nl2br(e($materi->konten)) !!}
+            {!! $materi->konten !!}
         </div>
     @elseif($materi->tipe == 'pdf')
         <div class="mb-4">

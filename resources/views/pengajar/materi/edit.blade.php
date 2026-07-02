@@ -24,7 +24,7 @@
         </div>
     @endif
     
-    <form action="{{ route('pengajar.materi.update', $materi->id) }}" method="POST" enctype="multipart/form-data">
+    <form id="materiForm" action="{{ route('pengajar.materi.update', $materi->id) }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PUT')
         <div class="mb-4">
@@ -285,7 +285,7 @@ function resetLoadingIndicator() {
 }
 
 // Form submit handler with better error handling
-const form = document.querySelector('form');
+const form = document.getElementById('materiForm');
 if (form) {
     let submitTimeout = null;
     
@@ -400,7 +400,7 @@ if (form) {
         }
 
         // Update hidden input on submit
-        var form = document.querySelector('form');
+        var form = document.getElementById('materiForm');
         form.addEventListener('submit', function() {
             var konten = document.querySelector('input[name=konten]');
             // Only update if using text mode
