@@ -9,33 +9,25 @@ use Illuminate\Support\Facades\Auth;
 
 class LeaderboardController extends Controller
 {
-    protected $gamificationService;
-
-    public function __construct(GamificationService $gamificationService)
-    {
-        $this->gamificationService = $gamificationService;
-    }
-
     public function index()
     {
-        $leaderboard = $this->gamificationService->getLeaderboard(20);
-        $userRank = $this->getUserRank(Auth::id());
+        $leaderboard = \App\Models\Point::with('user')
+            ->orderBy('total_poin', 'desc')
+            ->limit(20)
+            ->get();
+            
+        $userPointRecord = \App\Models\Point::where('user_id', Auth::id())->first();
+        
+        if (!$userPointRecord) {
+            $userPoints = 0;
+            $userRank = '-';
+        } else {
+            $userPoints = $userPointRecord->total_poin;
+            $userRank = \App\Models\Point::where('total_poin', '>', $userPoints)->count() + 1;
+        }
 
         return view('siswa.leaderboard.index', compact('leaderboard', 'userRank'));
     }
 
-    private function getUserRank($userId)
-    {
-        $points = \App\Models\Point::orderBy('total_poin', 'desc')->get();
-        $rank = 1;
-        
-        foreach ($points as $point) {
-            if ($point->user_id == $userId) {
-                return $rank;
-            }
-            $rank++;
-        }
-        
-        return null;
-    }
+
 }

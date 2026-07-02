@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Web Bimbel')</title>
     
     <!-- Google Fonts: Poppins -->
@@ -76,7 +77,7 @@
                                 .catch(err => console.error(err));
                         },
                         markAsRead(id) {
-                            fetch(`/notifications/${id}/read`, {
+                            const request = fetch(`/notifications/${id}/read`, {
                                 method: 'POST',
                                 headers: {
                                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
@@ -88,6 +89,7 @@
                                 if (n.id === id) n.read_at = new Date();
                                 return n;
                             });
+                            return request;
                         }
                     }"
                     x-init="fetchUnread(); setInterval(() => fetchUnread(), 30000)">
@@ -112,13 +114,15 @@
                              style="display: none;">
                             <div class="px-4 py-3 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
                                 <span class="text-sm font-semibold text-slate-800">Notifikasi</span>
-                                <button @click="fetchNotifications()" class="text-xs text-blue-600 hover:underline">Refresh</button>
+                                <div class="flex gap-3">
+                                    <button @click="fetch('/notifications/read-all', {method: 'POST', headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'}}).then(() => { unreadCount = 0; notifications.forEach(n => n.read_at = new Date()); fetchNotifications(); })" class="text-xs text-blue-600 hover:underline">Tandai Dibaca Semua</button>
+                                </div>
                             </div>
                             <div class="max-h-96 overflow-y-auto">
                                 <template x-for="notification in notifications" :key="notification.id">
                                     <div class="px-4 py-3 border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer group" 
                                          :class="notification.read_at ? 'opacity-75' : 'bg-blue-50/30'"
-                                         @click="if(!notification.read_at) markAsRead(notification.id); window.location.href = notification.data.link">
+                                         @click="if(!notification.read_at) { markAsRead(notification.id).then(() => window.location.href = notification.data.link) } else { window.location.href = notification.data.link }">
                                         <div class="flex items-start gap-3">
                                             <div class="flex-shrink-0 mt-1">
                                                 <span class="flex h-2 w-2 rounded-full" :class="notification.read_at ? 'bg-slate-300' : 'bg-blue-600'"></span>
@@ -206,23 +210,7 @@
         <main class="flex-1 p-6 lg:p-8 overflow-x-hidden transition-all duration-300"
               :class="sidebarDesktopOpen ? 'lg:ml-64' : 'lg:ml-0 lg:pl-16'">
             <div class="max-w-7xl mx-auto">
-                @if(session('success'))
-                    <div class="mb-6 p-4 rounded-xl bg-green-50 border border-green-100 flex items-center gap-3 text-green-700 animate-fade-in-down">
-                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        <span class="font-medium">{{ session('success') }}</span>
-                    </div>
-                @endif
 
-                @if(session('error'))
-                    <div class="mb-6 p-4 rounded-xl bg-red-50 border border-red-100 flex items-center gap-3 text-red-700 animate-fade-in-down">
-                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        <span class="font-medium">{{ session('error') }}</span>
-                    </div>
-                @endif
 
                 @yield('content')
             </div>

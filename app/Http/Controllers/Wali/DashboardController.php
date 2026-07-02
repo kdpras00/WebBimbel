@@ -28,24 +28,18 @@ class DashboardController extends Controller
             ->orderBy('created_at', 'desc')
             ->first();
 
-        $stats = [];
-        foreach ($anak as $child) {
-            $point = Point::where('user_id', $child->id)->first();
-            $totalPoin = $point ? $point->total_poin : 0;
-            
-            $totalQuiz = QuizResult::where('siswa_id', $child->id)->count();
-            $averageScore = QuizResult::where('siswa_id', $child->id)->avg('nilai') ?? 0;
-            
-            $rank = $this->getRank($child->id);
+        $points = Point::orderBy('total_poin', 'desc')->pluck('user_id');
+        $ranks = $points->flip()->map(fn($index) => $index + 1);
 
-            $stats[] = [
+        $stats = $anak->map(function ($child) use ($ranks) {
+            return [
                 'anak' => $child,
-                'total_poin' => $totalPoin,
-                'total_quiz' => $totalQuiz,
-                'rata_rata_nilai' => round($averageScore, 1),
-                'ranking' => $rank,
+                'total_poin' => Point::where('user_id', $child->id)->value('total_poin') ?? 0,
+                'total_quiz' => QuizResult::where('siswa_id', $child->id)->count(),
+                'rata_rata_nilai' => round(QuizResult::where('siswa_id', $child->id)->avg('nilai') ?? 0, 1),
+                'ranking' => $ranks->get($child->id),
             ];
-        }
+        });
 
         return view('wali.dashboard', compact('stats', 'informasi'));
     }
@@ -152,18 +146,5 @@ class DashboardController extends Controller
         return $dompdf->stream($filename);
     }
 
-    private function getRank($userId)
-    {
-        $points = Point::orderBy('total_poin', 'desc')->get();
-        $rank = 1;
-        
-        foreach ($points as $point) {
-            if ($point->user_id == $userId) {
-                return $rank;
-            }
-            $rank++;
-        }
-        
-        return null;
-    }
+
 }

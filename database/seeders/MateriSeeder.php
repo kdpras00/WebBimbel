@@ -33,7 +33,7 @@ class MateriSeeder extends Seeder
         }
 
         // Create materi directory if not exists
-        $materiPath = public_path('materi');
+        $materiPath = storage_path('app/private/materi');
         if (!file_exists($materiPath)) {
             mkdir($materiPath, 0755, true);
         }
@@ -104,7 +104,7 @@ class MateriSeeder extends Seeder
         $extension = $type === 'pdf' ? 'pdf' : 'mp4';
         $fileName = strtolower(str_replace(' ', '_', $mapelName)) . '_' . uniqid() . '.' . $extension;
         $filePath = 'materi/' . $fileName;
-        $fullPath = public_path($filePath);
+        $fullPath = storage_path('app/private/' . $filePath);
 
         try {
             $response = Http::timeout(30)->get($url);
@@ -127,7 +127,7 @@ class MateriSeeder extends Seeder
         $extension = $type === 'pdf' ? 'pdf' : 'mp4';
         $fileName = strtolower(str_replace(' ', '_', $mapelName)) . '_' . uniqid() . '.' . $extension;
         $filePath = 'materi/' . $fileName;
-        $fullPath = public_path($filePath);
+        $fullPath = storage_path('app/private/' . $filePath);
 
         if ($type === 'pdf') {
             // Create a minimal valid PDF placeholder

@@ -20,7 +20,7 @@ use App\Http\Controllers\Siswa\QuizController as SiswaQuizController;
 use App\Http\Controllers\Siswa\QuizSessionController as SiswaQuizSessionController;
 use App\Http\Controllers\Siswa\LeaderboardController as SiswaLeaderboardController;
 use App\Http\Controllers\Wali\DashboardController as WaliDashboardController;
-
+use App\Http\Controllers\FileController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -61,6 +61,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.mark-as-read');
     Route::post('/notifications/read-all', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-as-read');
+});
+
+// File Access Routes
+Route::middleware('auth')->group(function () {
+    Route::get('/file/materi/{materi}', [FileController::class, 'showMateri'])->name('materi.file');
 });
 
 // Admin Routes

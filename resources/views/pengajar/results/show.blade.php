@@ -4,8 +4,9 @@
 
 @section('content')
 <div class="mb-6">
-    <a href="{{ route('pengajar.results.index') }}" class="text-blue-600 hover:underline mb-4 inline-block">
-        ← Kembali ke Daftar Hasil
+    <a href="{{ route('pengajar.results.index') }}" class="inline-flex items-center gap-2 text-sm font-medium text-white/80 hover:text-white transition-colors mb-4">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+        Kembali ke Daftar Hasil
     </a>
     <h1 class="text-3xl font-bold text-white">Detail Hasil Quiz</h1>
     <p class="mt-2 text-gray-100">{{ $result->quiz->judul }} - {{ $result->siswa->name }}</p>

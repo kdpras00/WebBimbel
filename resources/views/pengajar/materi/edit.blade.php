@@ -79,7 +79,7 @@
             <input type="file" name="file_path" id="fileInputField"
                    class="block w-full text-sm text-black border border-gray-300 rounded-lg cursor-pointer bg-white focus:outline-none">
             <p class="mt-1 text-sm text-gray-500">
-                <span class="font-semibold text-red-600">Maksimal 2 MB</span> - Kosongkan jika tidak ingin mengubah file
+                <span class="font-semibold text-red-600">Maksimal 10 MB</span> - Kosongkan jika tidak ingin mengubah file
             </p>
             <div id="fileInfo"></div>
         </div>

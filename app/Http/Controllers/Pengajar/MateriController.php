@@ -12,6 +12,7 @@ class MateriController extends Controller
 {
     public function index()
     {
+        /** @var \App\Models\User $user */
         $user = Auth::user();
         $materi = Materi::where('pengajar_id', $user->id)
             ->with('mapel.kelas')
@@ -23,6 +24,7 @@ class MateriController extends Controller
 
     public function create()
     {
+        /** @var \App\Models\User $user */
         $user = Auth::user();
         // Ambil mapel yang diajar pengajar melalui relasi pivot
         $mapel = $user->mapelDiajar()
@@ -96,7 +98,7 @@ class MateriController extends Controller
 
         if ($request->hasFile('file_path')) {
             try {
-                $validated['file_path'] = $request->file('file_path')->store('materi', 'public');
+                $validated['file_path'] = $request->file('file_path')->store('materi');
                 if (!$validated['file_path']) {
                     return redirect()->back()
                         ->withInput()
@@ -123,6 +125,7 @@ class MateriController extends Controller
     public function edit($id)
     {
         $materi = Materi::where('pengajar_id', Auth::id())->findOrFail($id);
+        /** @var \App\Models\User $user */
         $user = Auth::user();
         // Ambil mapel yang diajar pengajar melalui relasi pivot
         $mapel = $user->mapelDiajar()
@@ -246,14 +249,14 @@ class MateriController extends Controller
                 // Hapus file lama jika ada
                 if ($materi->file_path) {
                     try {
-                        Storage::disk('public')->delete($materi->file_path);
+                        Storage::delete($materi->file_path);
                     } catch (\Exception $e) {
                         // Ignore error jika file lama tidak ditemukan
                     }
                 }
                 
                 // Upload file baru
-                $validated['file_path'] = $request->file('file_path')->store('materi', 'public');
+                $validated['file_path'] = $request->file('file_path')->store('materi');
                 if (!$validated['file_path']) {
                     return redirect()->back()
                         ->withInput()
@@ -277,7 +280,7 @@ class MateriController extends Controller
         $materi = Materi::where('pengajar_id', Auth::id())->findOrFail($id);
         
         if ($materi->file_path) {
-            Storage::disk('public')->delete($materi->file_path);
+            Storage::delete($materi->file_path);
         }
         
         $materi->delete();

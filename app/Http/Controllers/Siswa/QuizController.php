@@ -14,13 +14,6 @@ use Illuminate\Support\Facades\Auth;
 
 class QuizController extends Controller
 {
-    protected $gamificationService;
-
-    public function __construct(GamificationService $gamificationService)
-    {
-        $this->gamificationService = $gamificationService;
-    }
-
     public function index(Request $request)
     {
         $user = Auth::user();
@@ -485,7 +478,28 @@ class QuizController extends Controller
         ]);
 
         // Process gamification
-        $this->gamificationService->processQuizResult($result);
+        $settings = \App\Models\GamificationSetting::orderBy('nilai_min', 'desc')->get();
+        $points = 0;
+        foreach ($settings as $setting) {
+            if ($setting->nilai_min !== null && $setting->nilai_max !== null) {
+                if ($nilai >= $setting->nilai_min && $nilai <= $setting->nilai_max) {
+                    $points += $setting->poin;
+                    break;
+                }
+            } elseif ($setting->nilai_min !== null) {
+                if ($nilai >= $setting->nilai_min) {
+                    $points += $setting->poin;
+                    break;
+                }
+            }
+        }
+
+        $pointRecord = \App\Models\Point::firstOrCreate(
+            ['user_id' => $user->id],
+            ['total_poin' => 0]
+        );
+        $pointRecord->total_poin += $points;
+        $pointRecord->save();
 
         // Notify Student
         \Illuminate\Support\Facades\Notification::send($user, new \App\Notifications\QuizGraded($result));

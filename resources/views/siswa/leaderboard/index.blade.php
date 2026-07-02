@@ -8,7 +8,7 @@
     <p class="mt-2 text-gray-100">Peringkat siswa berdasarkan total poin</p>
 </div>
 
-@if($userRank)
+@if($userRank !== '-')
     <div class="mb-6 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-6 text-white">
         <div class="flex items-center justify-between">
             <div>

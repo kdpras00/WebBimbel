@@ -71,15 +71,15 @@
 
     <!-- Review Section Header -->
     <div class="flex items-center justify-between px-2">
-        <h2 class="text-lg font-bold text-slate-800">Pembahasan Soal</h2>
+        <h2 class="text-lg font-bold text-white">Pembahasan Soal</h2>
         <div class="flex gap-2">
-            <div class="flex items-center gap-1 text-xs text-slate-500">
+            <div class="flex items-center gap-1 text-xs text-white/80">
                 <span class="w-3 h-3 rounded-full bg-green-100 border border-green-200"></span> Benar
             </div>
-            <div class="flex items-center gap-1 text-xs text-slate-500">
+            <div class="flex items-center gap-1 text-xs text-white/80">
                 <span class="w-3 h-3 rounded-full bg-red-100 border border-red-200"></span> Salah
             </div>
-            <div class="flex items-center gap-1 text-xs text-slate-500">
+            <div class="flex items-center gap-1 text-xs text-white/80">
                 <span class="w-3 h-3 rounded-full bg-yellow-100 border border-yellow-200"></span> Tidak Dijawab
             </div>
         </div>

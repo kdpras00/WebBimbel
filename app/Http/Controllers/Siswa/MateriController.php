@@ -11,6 +11,7 @@ class MateriController extends Controller
 {
     public function index(Request $request)
     {
+        /** @var \App\Models\User $user */
         $user = Auth::user();
         
         // Get kelas and jurusan from pivot table
@@ -69,6 +70,7 @@ class MateriController extends Controller
 
     public function show($id)
     {
+        /** @var \App\Models\User $user */
         $user = Auth::user();
         
         // Get kelas and jurusan from pivot table

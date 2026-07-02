@@ -4,8 +4,9 @@
 
 @section('content')
 <div class="mb-6">
-    <a href="{{ route('siswa.materi.index') }}" class="text-blue-600 hover:underline mb-4 inline-block">
-        ← Kembali ke Daftar Materi
+    <a href="{{ route('siswa.materi.index') }}" class="inline-flex items-center gap-2 text-sm font-medium text-white/80 hover:text-white transition-colors mb-4">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+        Kembali ke Daftar Materi
     </a>
     <h1 class="text-3xl font-bold text-white">{{ $materi->judul }}</h1>
     <div class="mt-2 flex items-center gap-4 text-sm text-gray-100">
@@ -28,9 +29,9 @@
         </div>
     @elseif($materi->tipe == 'pdf')
         <div class="mb-4">
-            <iframe src="{{ Storage::url($materi->file_path) }}" class="w-full h-screen border rounded-lg"></iframe>
+            <iframe src="{{ route('materi.file', $materi->id) }}" class="w-full h-screen border rounded-lg"></iframe>
         </div>
-        <a href="{{ Storage::url($materi->file_path) }}" target="_blank" 
+        <a href="{{ route('materi.file', $materi->id) }}" target="_blank" 
            class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700">
             Download PDF
         </a>
@@ -42,13 +43,13 @@
                     class="w-full h-full"
                     style="aspect-ratio: 16 / 9; min-height: 500px; width: 100%;"
                 >
-                    <source src="{{ Storage::url($materi->file_path) }}" type="video/mp4">
+                    <source src="{{ route('materi.file', $materi->id) }}" type="video/mp4">
                     Browser Anda tidak mendukung video tag.
                 </video>
             </div>
         </div>
         <div class="flex justify-start">
-            <a href="{{ Storage::url($materi->file_path) }}" download
+            <a href="{{ route('materi.file', $materi->id) }}" download
                class="inline-flex items-center gap-2 px-6 py-3 text-base font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
