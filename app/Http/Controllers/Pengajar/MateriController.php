@@ -22,6 +22,15 @@ class MateriController extends Controller
         return view('pengajar.materi.index', compact('materi'));
     }
 
+    // public function show($id)
+    // {
+    //     $materi = Materi::where('pengajar_id', Auth::id())
+    //         ->with(['mapel.kelas', 'pengajar'])
+    //         ->findOrFail($id);
+            
+    //     return view('pengajar.materi.show', compact('materi'));
+    // }
+
     public function create()
     {
         /** @var \App\Models\User $user */

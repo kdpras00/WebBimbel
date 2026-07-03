@@ -34,6 +34,7 @@
                         </td>
                         <td class="px-6 py-4">{{ $m->created_at->format('d M Y') }}</td>
                         <td class="px-6 py-4">
+                            {{-- <a href="{{ route('pengajar.materi.show', $m->id) }}" class="text-green-600 hover:underline mr-3">Detail</a> --}}
                             <a href="{{ route('pengajar.materi.edit', $m->id) }}" class="text-blue-600 hover:underline mr-3">Edit</a>
                             <form action="{{ route('pengajar.materi.destroy', $m->id) }}" method="POST" class="inline">
                                 @csrf
