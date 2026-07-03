@@ -42,9 +42,15 @@
     </div>
 
     @if($materi->tipe == 'teks')
-        <div class="prose max-w-none bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-            {!! $materi->konten !!}
+        <div class="ql-snow bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+            <div class="ql-editor" style="padding: 0;">
+                {!! $materi->konten !!}
+            </div>
         </div>
+        
+        @push('styles')
+        <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
+        @endpush
     @elseif($materi->tipe == 'pdf')
         <div class="mb-4">
             <iframe src="{{ route('materi.file', $materi->id) }}" class="w-full h-screen border rounded-lg bg-white"></iframe>

@@ -352,7 +352,7 @@ if (form) {
 </script>
 
 @push('styles')
-<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
 <style>
     .ql-toolbar.ql-snow {
         border-top-left-radius: 0.5rem;
@@ -372,7 +372,7 @@ if (form) {
 @endpush
 
 @push('scripts')
-<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         var quill = new Quill('#editor', {
